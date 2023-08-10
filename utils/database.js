@@ -11,7 +11,7 @@ export const connectToDB = async () => {
   }
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
-      dbName: 'ogodev',
+      dbName: process.env.DB_NAME,
       useNewUrlParser: true,
       useUnifiedTopology: true
     });

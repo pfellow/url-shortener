@@ -16,6 +16,21 @@ const shortUrlSchema = new mongoose.Schema({
   },
   userId: {
     type: String
+  },
+  custom: {
+    type: String
+  },
+  linkpass: {
+    type: String
+  },
+  maxclicks: {
+    type: Number
+  },
+  since: {
+    type: String
+  },
+  till: {
+    type: String
   }
 });
 

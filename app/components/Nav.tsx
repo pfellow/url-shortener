@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Nav = () => {
-  return <div>ogo.gl Custom URL Shortener</div>;
+  return <div>oGo.gl Free URL Shortener</div>;
 };
 
 export default Nav;

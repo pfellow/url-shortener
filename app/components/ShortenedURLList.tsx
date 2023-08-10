@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { nanoid } from 'nanoid';
 import {
   Table,
   TableBody,
@@ -35,33 +34,37 @@ const ShortenedURLList = () => {
   }, []);
 
   return (
-    <div className='mx-auto max-w-[620px] p-6 w-full'>
-      <Table>
-        <TableCaption>A list of your previous shortened URLs.</TableCaption>
+    <div className='mx-auto max-w-[620px] p-2 w-full'>
+      <Table className='sm:text-sm text-xs'>
+        <TableCaption className='caption-top'>
+          List of your 10 previous shortened URLs.
+        </TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>Short Link</TableHead>
-            <TableHead>Actual Link</TableHead>
-            <TableHead className='text-right'>Clicks</TableHead>
+            <TableHead className='w-[20%] whitespace-nowrap'>
+              Short URL
+            </TableHead>
+            <TableHead className='w-[70%]'>Actual URL</TableHead>
+            <TableHead className='text-right w-[10%] sm:block hidden'>
+              Clicks
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {urls.map((url) => (
-            <TableRow>
-              <TableCell className='font-medium'>
+            <TableRow key={url.shorturl}>
+              <TableCell className='font-medium w-[20%]'>
                 <Link href={url.shorturl}>{url.shorturl}</Link>
               </TableCell>
-              <TableCell>
-                <Link
-                  href={url.fullurl}
-                  className='mt-0 whitespace-nowrap overflow-hidden'
-                >
-                  {url.fullurl.length > 40
-                    ? url.fullurl.substring(0, 40) + '...'
-                    : url.fullurl}
-                </Link>
+              <TableCell className='truncate w-[70%] sm:max-w-[300px] max-w-[200px]'>
+                {url.fullurl}
+                {/* <Link href={url.fullurl} className='truncate w-full'>
+                  {url.fullurl}
+                </Link> */}
               </TableCell>
-              <TableCell className='text-right'>{url.clicks}</TableCell>
+              <TableCell className='text-right w-[10%] sm:block hidden'>
+                {url.clicks}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

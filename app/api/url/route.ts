@@ -6,7 +6,9 @@ export const POST = async (request: any) => {
 
   try {
     connectToDB();
-    const urls = await ShortUrl.find({ userId: userId }).limit(10);
+    const urls = await ShortUrl.find({ userId: userId })
+      .sort({ _id: -1 })
+      .limit(10);
 
     return new Response(JSON.stringify({ urls }), {
       status: 200
