@@ -2,11 +2,11 @@ import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
 
 export const POST = async (request: any) => {
-  const { userId } = await request.json();
+  const { guestId } = await request.json();
 
   try {
     connectToDB();
-    let urls = await ShortUrl.find({ userId: userId })
+    let urls = await ShortUrl.find({ guestId })
       .sort({ _id: -1 })
       .limit(10)
       .select('fullurl shorturl clicks -_id');

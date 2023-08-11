@@ -46,15 +46,15 @@ const formSchema = z.object({
 const MainForm = () => {
   const [shortLinkData, setShortLinkData] = useState({});
   const [userData, setUserData] = useState({
-    userId: '',
+    guestId: '',
     token: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const { prevUrls, setPrevUrls } = useContext(UserDataContext);
 
   useEffect(() => {
-    const userData = localStorage.getItem('ogogl') || '';
-    const userDataId = JSON.parse(userData)?.userId;
+    const userData = localStorage.getItem('ogogl') || '{}';
+    const userDataId = JSON.parse(userData)?.guestId;
     const userToken = JSON.parse(userData)?.token;
     const userTokenExp = JSON.parse(userData)?.tokenexp || 0;
 
@@ -62,19 +62,19 @@ const MainForm = () => {
       const response = await fetch('/api/auth/token', {
         method: 'POST',
         body: JSON.stringify({
-          userId: userDataId
+          guestId: userDataId
         })
       });
       const newUserData = await response.json();
 
       setUserData({
-        userId: newUserData.userId,
+        guestId: newUserData.guestId,
         token: newUserData.token
       });
       return localStorage.setItem(
         'ogogl',
         JSON.stringify({
-          userId: newUserData.userId,
+          guestId: newUserData.guestId,
           token: newUserData.token,
           tokenexp: Date.now() + 3 * 60 * 60000
         })
@@ -84,7 +84,7 @@ const MainForm = () => {
     if (!userDataId || !userToken || userTokenExp < Date.now()) {
       getUserData();
     }
-    setUserData({ userId: userDataId, token: userToken });
+    setUserData({ guestId: userDataId, token: userToken });
   }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -111,7 +111,7 @@ const MainForm = () => {
         maxclicks: values.maxclicks,
         since: Date.parse(new Date(values.since).toUTCString()),
         till: Date.parse(new Date(values.till).toUTCString()),
-        userId: userData.userId,
+        guestId: userData.guestId,
         token: userData.token
       })
     });

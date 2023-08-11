@@ -10,7 +10,10 @@ const shortUrlSchema = new mongoose.Schema({
     requred: true,
     unique: true
   },
-  userId: {
+  guestId: {
+    type: String
+  },
+  creatorIp: {
     type: String
   },
   linkpass: {

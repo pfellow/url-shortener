@@ -21,13 +21,13 @@ const ShortenedURLList = () => {
     const userData = localStorage.getItem('ogogl');
     if (!userData) return;
 
-    const userId = JSON.parse(userData).userId;
-    if (!userId) return;
+    const guestId = JSON.parse(userData).guestId;
+    if (!guestId) return;
 
     const fetchUrls = async () => {
       const response = await fetch('/api/url', {
         method: 'POST',
-        body: JSON.stringify({ userId })
+        body: JSON.stringify({ guestId })
       });
       const data = await response.json();
       setPrevUrls(data.urls);

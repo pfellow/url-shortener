@@ -3,15 +3,16 @@ import jwt from 'jsonwebtoken';
 
 import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
+import { headers } from 'next/headers';
 
 export const POST = async (request: any) => {
   const data = await request.json();
 
   const sanitizedData = {};
 
-  // Checking userId
+  // Checking guestId
 
-  if (!data.userId || !data.token) {
+  if (!data.guestId || !data.token) {
     return new Response(
       JSON.stringify({
         error: 'Authorization failed. Please reload the page.'
@@ -25,12 +26,16 @@ export const POST = async (request: any) => {
   let decodedToken;
   try {
     decodedToken = jwt.verify(data.token, process.env.JWT_SECRET_KEY_SIMPLE);
-    if (!decodedToken || decodedToken.userId !== data.userId) {
+    if (!decodedToken || decodedToken.guestId !== data.guestId) {
       throw new Error(
         'Authorization failed. Clear the cache and reload the page.'
       );
     } else {
-      sanitizedData.userId = decodedToken.userId;
+      if (decodedToken.exp * 1000 >= Date.now()) {
+        sanitizedData.guestId = decodedToken.guestId;
+      } else {
+        throw new Error('Token expired. Please reload the page.');
+      }
     }
   } catch (error) {
     return new Response(
@@ -257,12 +262,24 @@ export const POST = async (request: any) => {
     }
   }
 
+  // Getting ip of the creator
+
+  const ip = headers().get('x-forwarded-for') || headers().get('x-real-ip');
+  if (ip) {
+    sanitizedData.creatorIp = ip;
+  }
+
   // Writing to DB
 
   try {
     connectToDB();
     const shortUrlObj = new ShortUrl(sanitizedData);
     await shortUrlObj.save();
+
+    // Deleting unnessesary info:
+
+    delete sanitizedData.guestId;
+    delete sanitizedData.creatorIp;
 
     return new Response(JSON.stringify({ shortUrlObj: sanitizedData }), {
       status: 200

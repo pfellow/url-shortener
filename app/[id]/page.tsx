@@ -2,6 +2,10 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Input } from '@components/ui/input';
+import { Button } from '@components/ui/button';
+import { Label } from '@components/ui/label';
+import bcrypt from 'bcryptjs-react';
 
 const URLRedirect = ({ params }) => {
   const [displayData, setDisplayData] = useState('Loading...');
@@ -9,8 +13,19 @@ const URLRedirect = ({ params }) => {
 
   React.useEffect(() => {
     const getRedirectUrl = async () => {
-      const response = await fetch(`/api/url/${params.id}`);
-      const data = await response.json();
+      // retrieving the url data
+      let data;
+
+      try {
+        const response = await fetch(`/api/url/${params.id}`);
+        data = await response.json();
+        if (data === null || data.error) {
+          throw new Error('This link is not valid!');
+        }
+      } catch (error) {
+        console.log(error);
+        return setDisplayData('This link is not valid.');
+      }
 
       // checking for the custom fields
 
@@ -24,10 +39,40 @@ const URLRedirect = ({ params }) => {
           ).toUTCString()}`
         );
       }
-      if (data.url.linkpass) {
-        return setDisplayData(
-          `This link is password protected: ${data.url.linkpass}`
-        );
+      if (data.url.hash) {
+        const Form = () => {
+          const [enteredPass, setEnteredPass] = useState('');
+          const [incorrectPassword, setIncorrectPassword] = useState();
+          const passwordCheckHandler = (event) => {
+            event.preventDefault();
+            if (enteredPass) {
+              if (bcrypt.compareSync(enteredPass, data.url.hash)) {
+                return setDisplayData(`Success!`);
+              }
+              setIncorrectPassword(true);
+            }
+          };
+
+          return (
+            <div className='grid w-full max-w-sm items-center gap-1.5'>
+              <p>{`This link is password protected.`}</p>
+              <form onSubmit={passwordCheckHandler} autoComplete='off'>
+                <Label htmlFor='pass'>Please enter password</Label>
+                <Input
+                  id='pass'
+                  type='text'
+                  onChange={(event) => setEnteredPass(event.target.value)}
+                  value={enteredPass}
+                  autoComplete='off'
+                />
+                <Button type='submit'>Verify</Button>
+                {incorrectPassword && <p>Incorrect password</p>}
+              </form>
+            </div>
+          );
+        };
+
+        return setDisplayData(<Form />);
       }
       if (data.url.maxclicks && 3 >= data.url.maxclicks) {
         // IMPLEMENT LOGIC
@@ -54,11 +99,13 @@ const URLRedirect = ({ params }) => {
           method: 'POST',
           body: JSON.stringify({
             userIp: userIp,
-            urlId: data.url._id,
+            urlId: data.url.id,
             referrer: document.referrer
           })
         });
       } catch (erorr) {}
+
+      return setDisplayData(`Success!`);
 
       // setTimeout(() => {
       //   router.push(data.url.fullurl);
