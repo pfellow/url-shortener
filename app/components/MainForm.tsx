@@ -3,7 +3,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { nanoid } from 'nanoid';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +20,9 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+
+import UserDataContext from '@app/context/UserDataContext';
 
 const formSchema = z.object({
   url: z.string().url(),
@@ -43,21 +44,47 @@ const formSchema = z.object({
 });
 
 const MainForm = () => {
-  const [shortLink, setShortLink] = useState();
-  const [userId, setUserId] = useState('');
+  const [shortLinkData, setShortLinkData] = useState({});
+  const [userData, setUserData] = useState({
+    userId: '',
+    token: ''
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const { prevUrls, setPrevUrls } = useContext(UserDataContext);
 
   useEffect(() => {
-    const userData = localStorage.getItem('ogogl');
+    const userData = localStorage.getItem('ogogl') || '';
     const userDataId = JSON.parse(userData)?.userId;
+    const userToken = JSON.parse(userData)?.token;
+    const userTokenExp = JSON.parse(userData)?.tokenexp || 0;
 
-    if (!userDataId) {
-      const id = nanoid(16);
-      setUserId(id);
-      return localStorage.setItem('ogogl', JSON.stringify({ userId: id }));
+    const getUserData = async () => {
+      const response = await fetch('/api/auth/token', {
+        method: 'POST',
+        body: JSON.stringify({
+          userId: userDataId
+        })
+      });
+      const newUserData = await response.json();
+
+      setUserData({
+        userId: newUserData.userId,
+        token: newUserData.token
+      });
+      return localStorage.setItem(
+        'ogogl',
+        JSON.stringify({
+          userId: newUserData.userId,
+          token: newUserData.token,
+          tokenexp: Date.now() + 3 * 60 * 60000
+        })
+      );
+    };
+
+    if (!userDataId || !userToken || userTokenExp < Date.now()) {
+      getUserData();
     }
-
-    setUserId(JSON.parse(userData).userId);
+    setUserData({ userId: userDataId, token: userToken });
   }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -73,29 +100,42 @@ const MainForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setShortLinkData({});
     setIsLoading(true);
     const response = await fetch('/api/shorten', {
       method: 'POST',
       body: JSON.stringify({
-        url: values.url,
+        fullurl: values.url,
         custom: values.custom,
         linkpass: values.linkpass,
         maxclicks: values.maxclicks,
-        since: values.since,
-        till: values.till,
-        userId: userId
+        since: Date.parse(new Date(values.since).toUTCString()),
+        till: Date.parse(new Date(values.till).toUTCString()),
+        userId: userData.userId,
+        token: userData.token
       })
     });
     const data = await response.json();
 
     if (data.error) {
       form.setError('url', { type: 'custom', message: data.error });
-
-      return;
+      return setIsLoading(false);
     }
     form.reset();
-    setShortLink(data.shortUrlObj.shorturl);
+    console.log(prevUrls); // DELETE
+    setShortLinkData(data.shortUrlObj);
+    setPrevUrls((prevUrls) => {
+      return [
+        {
+          shorturl: data.shortUrlObj.shorturl,
+          fullurl: data.shortUrlObj.fullurl,
+          clicks: 0
+        },
+        ...prevUrls
+      ];
+    });
     setIsLoading(false);
+    console.log(prevUrls); // DELETE
   };
 
   return (
@@ -124,8 +164,29 @@ const MainForm = () => {
               Shorten
             </Button>
           </div>
-          {isLoading && <p>The URL is shortening...</p>}
-          {shortLink && <p>{shortLink}</p>}
+          <div className='my-4 flex flex-col gap-1'>
+            {isLoading && <p>The URL is shortening...</p>}
+            {shortLinkData.shorturl && (
+              <p className='text-lg'>{shortLinkData.shorturl}</p>
+            )}
+            {shortLinkData.fullurl && (
+              <p className='truncate'>{shortLinkData.fullurl}</p>
+            )}
+            {shortLinkData.maxclicks && (
+              <p>Max Clicks: {shortLinkData.maxclicks}</p>
+            )}
+            {shortLinkData.linkpass && (
+              <p>Password: {shortLinkData.linkpass}</p>
+            )}
+            {shortLinkData.since && (
+              <p>
+                Valid since: {new Date(shortLinkData.since).toLocaleString()}
+              </p>
+            )}
+            {shortLinkData.till && (
+              <p>Valid till: {new Date(shortLinkData.till).toLocaleString()}</p>
+            )}
+          </div>
           <Accordion type='single' collapsible>
             <AccordionItem value='item-1'>
               <AccordionTrigger>Advanced Options</AccordionTrigger>
@@ -187,7 +248,7 @@ const MainForm = () => {
                   name='since'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Clicks</FormLabel>
+                      <FormLabel>Valid Since</FormLabel>
                       <FormControl>
                         <Input type='datetime-local' {...field} />
                       </FormControl>
@@ -200,7 +261,7 @@ const MainForm = () => {
                   name='till'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Clicks</FormLabel>
+                      <FormLabel>Valid Till</FormLabel>
                       <FormControl>
                         <Input type='datetime-local' {...field} />
                       </FormControl>

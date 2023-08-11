@@ -6,9 +6,18 @@ export const POST = async (request: any) => {
 
   try {
     connectToDB();
-    const urls = await ShortUrl.find({ userId: userId })
+    let urls = await ShortUrl.find({ userId: userId })
       .sort({ _id: -1 })
-      .limit(10);
+      .limit(10)
+      .select('fullurl shorturl clicks -_id');
+
+    urls = urls.map((url) => {
+      return {
+        fullurl: url.fullurl,
+        shorturl: url.shorturl,
+        clicks: url.clicks.length
+      };
+    });
 
     return new Response(JSON.stringify({ urls }), {
       status: 200

@@ -12,8 +12,10 @@ import {
 } from '@/components/ui/table';
 import Link from 'next/link';
 
+import UserDataContext from '@app/context/UserDataContext';
+
 const ShortenedURLList = () => {
-  const [urls, setUrls] = React.useState([]);
+  const { prevUrls, setPrevUrls } = React.useContext(UserDataContext);
 
   React.useEffect(() => {
     const userData = localStorage.getItem('ogogl');
@@ -28,7 +30,7 @@ const ShortenedURLList = () => {
         body: JSON.stringify({ userId })
       });
       const data = await response.json();
-      setUrls(data.urls);
+      setPrevUrls(data.urls);
     };
     fetchUrls();
   }, []);
@@ -51,7 +53,7 @@ const ShortenedURLList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {urls.map((url) => (
+          {prevUrls.map((url) => (
             <TableRow key={url.shorturl}>
               <TableCell className='font-medium w-[20%]'>
                 <Link href={url.shorturl}>{url.shorturl}</Link>

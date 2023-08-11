@@ -10,14 +10,7 @@ const shortUrlSchema = new mongoose.Schema({
     requred: true,
     unique: true
   },
-  clicks: {
-    type: Number,
-    default: 0
-  },
   userId: {
-    type: String
-  },
-  custom: {
     type: String
   },
   linkpass: {
@@ -27,10 +20,14 @@ const shortUrlSchema = new mongoose.Schema({
     type: Number
   },
   since: {
-    type: String
+    type: Number
   },
   till: {
-    type: String
+    type: Number
+  },
+  clicks: {
+    type: Array,
+    default: []
   }
 });
 

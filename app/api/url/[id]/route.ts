@@ -9,9 +9,6 @@ export const GET = async (request: any, { params }) => {
     if (url === null)
       return new Response('This link does not exist!', { status: 404 });
 
-    url.clicks++;
-    url.save();
-
     return new Response(JSON.stringify({ url }), { status: 200 });
   } catch (error) {
     return new Response(error.message, { status: 500 });
