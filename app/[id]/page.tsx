@@ -93,7 +93,7 @@ const URLRedirect = ({ params }) => {
                   throw new Error(passData?.message);
                 }
                 throw new Error();
-              } catch (error) {
+              } catch (error: any) {
                 setIncorrectPassword(
                   error.message || 'Something went wrong...'
                 );
@@ -109,6 +109,7 @@ const URLRedirect = ({ params }) => {
                 <Input
                   id='pass'
                   type='text'
+                  value={enteredPass}
                   onChange={(event) => setEnteredPass(event.target.value)}
                 />
                 <Button type='submit'>Verify</Button>

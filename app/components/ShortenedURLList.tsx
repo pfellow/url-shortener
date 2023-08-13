@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 
 import UserDataContext from '@app/context/UserDataContext';
+import settings from '../settings.json';
 
 const ShortenedURLList = () => {
   const { prevUrls, setPrevUrls } = React.useContext(UserDataContext);
@@ -53,16 +54,15 @@ const ShortenedURLList = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {prevUrls.map((url) => (
+          {prevUrls.map((url: any) => (
             <TableRow key={url.shorturl}>
               <TableCell className='font-medium w-[20%]'>
-                <Link href={url.shorturl}>{url.shorturl}</Link>
+                <Link
+                  href={`${settings.domainUrl}${url.shorturl}`}
+                >{`${settings.domain}${url.shorturl}`}</Link>
               </TableCell>
               <TableCell className='truncate w-[70%] sm:max-w-[300px] max-w-[200px]'>
                 {url.fullurl}
-                {/* <Link href={url.fullurl} className='truncate w-full'>
-                  {url.fullurl}
-                </Link> */}
               </TableCell>
               <TableCell className='text-right w-[10%] sm:block hidden'>
                 {url.clicks}

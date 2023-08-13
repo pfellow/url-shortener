@@ -3,12 +3,13 @@ import jwt from 'jsonwebtoken';
 
 import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
+import BlockedDomain from '@models/blockedDomain';
 import { headers } from 'next/headers';
 
 export const POST = async (request: any) => {
   const data = await request.json();
 
-  const sanitizedData = {};
+  const sanitizedData: any = {};
 
   // Checking guestId
 
@@ -23,9 +24,12 @@ export const POST = async (request: any) => {
     );
   }
 
-  let decodedToken;
+  let decodedToken: any = {};
   try {
-    decodedToken = jwt.verify(data.token, process.env.JWT_SECRET_KEY_SIMPLE);
+    decodedToken = jwt.verify(
+      data.token,
+      process.env.JWT_SECRET_KEY_SIMPLE as string
+    );
     if (!decodedToken || decodedToken.guestId !== data.guestId) {
       throw new Error(
         'Authorization failed. Clear the cache and reload the page.'
@@ -37,7 +41,7 @@ export const POST = async (request: any) => {
         throw new Error('Token expired. Please reload the page.');
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({
         error: error.message
@@ -62,6 +66,13 @@ export const POST = async (request: any) => {
           status: 403
         }
       );
+    }
+    connectToDB();
+    const blockedDomain = await BlockedDomain.findOne({
+      domain: domain.hostname
+    });
+    if (blockedDomain) {
+      throw new Error('This domain is in the blacklist: ' + domain.hostname);
     }
   } catch (error) {
     console.log(error);
@@ -135,7 +146,7 @@ export const POST = async (request: any) => {
         throw new Error('Valid Till');
       }
     }
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({
         error: 'Incorrect data provided: ' + error.message
@@ -149,8 +160,6 @@ export const POST = async (request: any) => {
   // Checking if the url is already in DB
 
   try {
-    connectToDB();
-
     const foundUrl = await ShortUrl.findOne({ fullurl: data.fullurl });
 
     if (foundUrl !== null) {
@@ -175,7 +184,9 @@ export const POST = async (request: any) => {
             shortUrlObj: {
               fullurl: foundUrl.fullurl,
               shorturl: foundUrl.shorturl
-            }
+            },
+            error:
+              'This url has been shortened previosly. You can use this link or create another one with a custom name.'
           }),
           {
             status: 200
@@ -197,7 +208,7 @@ export const POST = async (request: any) => {
       controller.abort();
     }, 3000);
     await fetch(data.fullurl, { signal });
-  } catch (error) {
+  } catch (error: any) {
     console.log(data.fullurl + ' ' + error.message);
     if (error.message !== 'This operation was aborted') {
       return new Response(
@@ -209,6 +220,48 @@ export const POST = async (request: any) => {
         }
       );
     }
+  }
+
+  // Google Safe Browsing
+
+  const safeBrResponse = await fetch(process.env.GOOGLE_SAFEBR_API as string, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      client: {
+        clientId: 'ogo.gl',
+        clientVersion: '1.0.0'
+      },
+      threatInfo: {
+        threatTypes: [
+          'THREAT_TYPE_UNSPECIFIED',
+          'MALWARE',
+          'SOCIAL_ENGINEERING',
+          'UNWANTED_SOFTWARE',
+          'POTENTIALLY_HARMFUL_APPLICATION'
+        ],
+        platformTypes: ['ANY_PLATFORM'],
+        threatEntryTypes: ['URL'],
+        threatEntries: [
+          {
+            url: data.fullurl
+          }
+        ]
+      }
+    })
+  });
+  const safeBrData = await safeBrResponse.json();
+  if (safeBrData.matches) {
+    return new Response(
+      JSON.stringify({
+        error: 'Could not shorten this link as it seems unsafe.'
+      }),
+      {
+        status: 403
+      }
+    );
   }
 
   // Checking that the link is not maliscious

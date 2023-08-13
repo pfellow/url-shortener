@@ -20,9 +20,10 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion';
 import { Input } from '@/components/ui/input';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 
 import UserDataContext from '@app/context/UserDataContext';
+import ShorteningResults from './ShorteningResults';
 
 const formSchema = z.object({
   url: z.string().url(),
@@ -45,47 +46,8 @@ const formSchema = z.object({
 
 const MainForm = () => {
   const [shortLinkData, setShortLinkData] = useState({});
-  const [userData, setUserData] = useState({
-    guestId: '',
-    token: ''
-  });
   const [isLoading, setIsLoading] = useState(false);
-  const { prevUrls, setPrevUrls } = useContext(UserDataContext);
-
-  useEffect(() => {
-    const userData = localStorage.getItem('ogogl') || '{}';
-    const userDataId = JSON.parse(userData)?.guestId;
-    const userToken = JSON.parse(userData)?.token;
-    const userTokenExp = JSON.parse(userData)?.tokenexp || 0;
-
-    const getUserData = async () => {
-      const response = await fetch('/api/auth/token', {
-        method: 'POST',
-        body: JSON.stringify({
-          guestId: userDataId
-        })
-      });
-      const newUserData = await response.json();
-
-      setUserData({
-        guestId: newUserData.guestId,
-        token: newUserData.token
-      });
-      return localStorage.setItem(
-        'ogogl',
-        JSON.stringify({
-          guestId: newUserData.guestId,
-          token: newUserData.token,
-          tokenexp: Date.now() + 3 * 60 * 60000
-        })
-      );
-    };
-
-    if (!userDataId || !userToken || userTokenExp < Date.now()) {
-      getUserData();
-    }
-    setUserData({ guestId: userDataId, token: userToken });
-  }, []);
+  const { setPrevUrls, userData } = useContext(UserDataContext);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,7 +55,7 @@ const MainForm = () => {
       url: '',
       custom: '',
       linkpass: '',
-      maxclicks: '',
+      maxclicks: undefined,
       since: '',
       till: ''
     }
@@ -109,8 +71,8 @@ const MainForm = () => {
         custom: values.custom,
         linkpass: values.linkpass,
         maxclicks: values.maxclicks,
-        since: Date.parse(new Date(values.since).toUTCString()),
-        till: Date.parse(new Date(values.till).toUTCString()),
+        since: Date.parse(new Date(values.since as string).toUTCString()),
+        till: Date.parse(new Date(values.till as string).toUTCString()),
         guestId: userData.guestId,
         token: userData.token
       })
@@ -119,23 +81,24 @@ const MainForm = () => {
 
     if (data.error) {
       form.setError('url', { type: 'custom', message: data.error });
+      if (data.shortUrlObj) {
+        setShortLinkData(data.shortUrlObj);
+      }
       return setIsLoading(false);
     }
     form.reset();
-    console.log(prevUrls); // DELETE
     setShortLinkData(data.shortUrlObj);
-    setPrevUrls((prevUrls) => {
+    setPrevUrls((prev: any) => {
       return [
         {
           shorturl: data.shortUrlObj.shorturl,
           fullurl: data.shortUrlObj.fullurl,
           clicks: 0
         },
-        ...prevUrls
+        ...prev
       ];
     });
     setIsLoading(false);
-    console.log(prevUrls); // DELETE
   };
 
   return (
@@ -166,26 +129,7 @@ const MainForm = () => {
           </div>
           <div className='my-4 flex flex-col gap-1'>
             {isLoading && <p>The URL is shortening...</p>}
-            {shortLinkData.shorturl && (
-              <p className='text-lg'>{shortLinkData.shorturl}</p>
-            )}
-            {shortLinkData.fullurl && (
-              <p className='truncate'>{shortLinkData.fullurl}</p>
-            )}
-            {shortLinkData.maxclicks && (
-              <p>Max Clicks: {shortLinkData.maxclicks}</p>
-            )}
-            {shortLinkData.linkpass && (
-              <p>Password: {shortLinkData.linkpass}</p>
-            )}
-            {shortLinkData.since && (
-              <p>
-                Valid since: {new Date(shortLinkData.since).toLocaleString()}
-              </p>
-            )}
-            {shortLinkData.till && (
-              <p>Valid till: {new Date(shortLinkData.till).toLocaleString()}</p>
-            )}
+            <ShorteningResults shortLinkData={shortLinkData} />
           </div>
           <Accordion type='single' collapsible>
             <AccordionItem value='item-1'>
