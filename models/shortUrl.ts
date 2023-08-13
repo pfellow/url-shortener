@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const shortUrlSchema = new mongoose.Schema({
+  date: {
+    type: Date,
+    default: Date.now
+  },
   fullurl: {
     type: String,
     required: true
@@ -29,7 +33,23 @@ const shortUrlSchema = new mongoose.Schema({
     type: Number
   },
   clicks: {
-    type: Array,
+    type: [
+      {
+        date: {
+          type: Date,
+          default: Date.now
+        },
+        useragent: {
+          type: String
+        },
+        ip: {
+          type: String
+        },
+        referrer: {
+          type: String
+        }
+      }
+    ],
     default: []
   }
 });

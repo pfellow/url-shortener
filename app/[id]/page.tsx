@@ -5,7 +5,33 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@components/ui/input';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
-import bcrypt from 'bcryptjs-react';
+
+const saveUserClick = async (urlId) => {
+  // Retrieving and saving user data
+
+  let userIp;
+
+  try {
+    const ipResponse = await fetch(
+      'https://api.bigdatacloud.net/data/client-ip'
+    );
+    const ipData = await ipResponse.json();
+    userIp = ipData.ipString;
+  } catch (error) {
+    console.log(error);
+  }
+
+  try {
+    fetch('/api/userclick', {
+      method: 'POST',
+      body: JSON.stringify({
+        userIp,
+        urlId,
+        referrer: document.referrer
+      })
+    });
+  } catch (erorr) {}
+};
 
 const URLRedirect = ({ params }) => {
   const [displayData, setDisplayData] = useState('Loading...');
@@ -13,103 +39,96 @@ const URLRedirect = ({ params }) => {
 
   React.useEffect(() => {
     const getRedirectUrl = async () => {
-      // retrieving the url data
-      let data;
+      // retrieving the url data ans status
+
+      let data: any;
 
       try {
         const response = await fetch(`/api/url/${params.id}`);
         data = await response.json();
-        if (data === null || data.error) {
-          throw new Error('This link is not valid!');
+
+        if (!data) {
+          setDisplayData('Something went wrong. Please try again later');
         }
       } catch (error) {
         console.log(error);
-        return setDisplayData('This link is not valid.');
+        return setDisplayData('Something went wrong. Please try again later');
       }
 
-      // checking for the custom fields
-
-      if (data.url.since && data.url.since > Date.now()) {
-        return setDisplayData('This link is not available yet');
-      }
-      if (data.url.till && data.url.till < Date.now()) {
-        return setDisplayData(
-          `This link was available before ${new Date(
-            data.url.till
-          ).toUTCString()}`
+      if (data.status === 'error') {
+        setDisplayData(
+          data.message || 'Something went wrong. Please try again later'
         );
       }
-      if (data.url.hash) {
+
+      if (data.status === 'protected') {
         const Form = () => {
           const [enteredPass, setEnteredPass] = useState('');
-          const [incorrectPassword, setIncorrectPassword] = useState();
-          const passwordCheckHandler = (event) => {
+          const [incorrectPassword, setIncorrectPassword] = useState('');
+
+          const passwordCheckHandler = async (event) => {
             event.preventDefault();
             if (enteredPass) {
-              if (bcrypt.compareSync(enteredPass, data.url.hash)) {
-                return setDisplayData(`Success!`);
+              try {
+                const response = await fetch('/api/url/checkpass', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    id: data.url.id,
+                    userPass: enteredPass
+                  })
+                });
+
+                const passData = await response.json();
+                if (passData.status === 'OK' && passData.url.fullurl) {
+                  saveUserClick(data.url.id);
+                  return setDisplayData(`Success redirection!`); // DELETE
+
+                  // return setTimeout(() => {
+                  //   router.push(passData.url.fullurl);
+                  // }, 3000);
+                }
+                if (passData.status === 'error') {
+                  throw new Error(passData?.message);
+                }
+                throw new Error();
+              } catch (error) {
+                setIncorrectPassword(
+                  error.message || 'Something went wrong...'
+                );
               }
-              setIncorrectPassword(true);
             }
           };
 
           return (
             <div className='grid w-full max-w-sm items-center gap-1.5'>
               <p>{`This link is password protected.`}</p>
-              <form onSubmit={passwordCheckHandler} autoComplete='off'>
+              <form onSubmit={passwordCheckHandler}>
                 <Label htmlFor='pass'>Please enter password</Label>
                 <Input
                   id='pass'
                   type='text'
                   onChange={(event) => setEnteredPass(event.target.value)}
-                  value={enteredPass}
-                  autoComplete='off'
                 />
                 <Button type='submit'>Verify</Button>
-                {incorrectPassword && <p>Incorrect password</p>}
+                {incorrectPassword}
               </form>
             </div>
           );
         };
 
-        return setDisplayData(<Form />);
-      }
-      if (data.url.maxclicks && 3 >= data.url.maxclicks) {
-        // IMPLEMENT LOGIC
-        return setDisplayData(
-          'This link is no longer avaliable. The number of clicks is exceeded.'
-        );
-      }
-      // Retrieving and saving user data
-
-      let userIp;
-
-      try {
-        const ipResponse = await fetch(
-          'https://api.bigdatacloud.net/data/client-ip'
-        );
-        const ipData = await ipResponse.json();
-        userIp = ipData.ipString;
-      } catch (error) {
-        console.log(error);
+        setDisplayData(<Form />);
+        return;
       }
 
-      try {
-        fetch('/api/userclick', {
-          method: 'POST',
-          body: JSON.stringify({
-            userIp: userIp,
-            urlId: data.url.id,
-            referrer: document.referrer
-          })
-        });
-      } catch (erorr) {}
+      if (data.status === 'OK' && data.url) {
+        saveUserClick(data.url.id);
 
-      return setDisplayData(`Success!`);
+        return setDisplayData(`Success redirection!`); // DELETE
 
-      // setTimeout(() => {
-      //   router.push(data.url.fullurl);
-      // }, 10000);
+        // return setTimeout(() => {
+        //   router.push(data.url.fullurl);
+        // }, 3000);
+      }
     };
 
     getRedirectUrl();
