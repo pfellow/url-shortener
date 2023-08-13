@@ -1,12 +1,31 @@
 import { headers } from 'next/headers';
+import UAParser from 'ua-parser-js';
 
 import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
 
 export const POST = async (request) => {
   const data = await request.json();
-  // useragent
-  const userData = { useragent: headers().get('user-agent') };
+  const userData = {};
+
+  // useragent: Browser, OS, Device
+
+  const parser = new UAParser(headers().get('user-agent'));
+  const uaparsed = parser.getResult();
+  const userdata = {};
+
+  if (uaparsed?.browser?.name) {
+    userdata.browser = `${uaparsed.browser.name} ${uaparsed.browser.major}`;
+  }
+  if (uaparsed?.os?.name) {
+    userdata.os = `${uaparsed.os.name} ${uaparsed.os.version}`;
+  }
+  if (uaparsed?.device?.type) {
+    userdata.platform = uaparsed.device.type;
+  }
+  if (uaparsed?.device?.model) {
+    userdata.device = `${uaparsed.device.vendor} ${uaparsed.device?.model}`;
+  }
 
   // referrer
 
@@ -14,13 +33,13 @@ export const POST = async (request) => {
     userData.referrer = data.referrer;
   }
 
-  // userdata
-
-  const userdata = {};
+  // City, Country, Region, District, ip
 
   for (const [key, value] of Object.entries(data.userData)) {
     if (key === 'query') {
       userdata.ip = value;
+    } else if (key === 'regionName') {
+      userdata.region = value;
     } else if (value !== '' && key !== 'status') {
       userdata[key] = value;
     }

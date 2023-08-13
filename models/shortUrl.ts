@@ -32,30 +32,28 @@ const shortUrlSchema = new mongoose.Schema({
   till: {
     type: Number
   },
-  clicks: {
-    type: [
-      {
-        date: {
-          type: Date,
-          default: Date.now
-        },
-        useragent: {
-          type: String
-        },
-        userdata: {
-          country: String,
-          regionName: String,
-          city: String,
-          district: String,
-          ip: String
-        },
-        referrer: {
-          type: String
-        }
+  clicks: [
+    {
+      date: {
+        type: Date,
+        default: Date.now
+      },
+      userdata: {
+        browser: String,
+        os: String,
+        platform: String,
+        device: String,
+        country: String,
+        region: String,
+        city: String,
+        district: String,
+        ip: String
+      },
+      referrer: {
+        type: String
       }
-    ],
-    default: []
-  }
+    }
+  ]
 });
 
 const ShortUrl =
