@@ -9,14 +9,16 @@ import { Label } from '@components/ui/label';
 const saveUserClick = async (urlId) => {
   // Retrieving and saving user data
 
-  let userIp;
+  let userData;
 
   try {
     const ipResponse = await fetch(
-      'https://api.bigdatacloud.net/data/client-ip'
+      'http://ip-api.com/json/?fields=status,country,regionName,city,district,query'
     );
     const ipData = await ipResponse.json();
-    userIp = ipData.ipString;
+    if (ipData.status === 'success') {
+      userData = ipData;
+    }
   } catch (error) {
     console.log(error);
   }
@@ -25,7 +27,7 @@ const saveUserClick = async (urlId) => {
     fetch('/api/userclick', {
       method: 'POST',
       body: JSON.stringify({
-        userIp,
+        userData,
         urlId,
         referrer: document.referrer
       })

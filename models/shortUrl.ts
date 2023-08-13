@@ -42,8 +42,12 @@ const shortUrlSchema = new mongoose.Schema({
         useragent: {
           type: String
         },
-        ip: {
-          type: String
+        userdata: {
+          country: String,
+          regionName: String,
+          city: String,
+          district: String,
+          ip: String
         },
         referrer: {
           type: String

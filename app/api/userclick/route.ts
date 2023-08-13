@@ -5,15 +5,28 @@ import ShortUrl from '@models/shortUrl';
 
 export const POST = async (request) => {
   const data = await request.json();
+  // useragent
   const userData = { useragent: headers().get('user-agent') };
+
+  // referrer
+
   if (data.referrer) {
     userData.referrer = data.referrer;
   }
-  let ip = data.userIp;
-  if (!ip) {
-    ip = headers().get('x-forwarded-for') || headers().get('x-real-ip');
+
+  // userdata
+
+  const userdata = {};
+
+  for (const [key, value] of Object.entries(data.userData)) {
+    if (key === 'query') {
+      userdata.ip = value;
+    } else if (value !== '' && key !== 'status') {
+      userdata[key] = value;
+    }
   }
-  userData.ip = ip;
+
+  userData.userdata = userdata;
 
   // retriving link from DB and writing a userclick
 
