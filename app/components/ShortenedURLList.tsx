@@ -58,8 +58,8 @@ const ShortenedURLList = () => {
             <TableRow key={url.shorturl}>
               <TableCell className='font-medium w-[20%]'>
                 <Link
-                  href={`${settings.domainUrl}${url.shorturl}`}
-                >{`${settings.domain}${url.shorturl}`}</Link>
+                  href={`${settings.domainUrl}/${url.shorturl}`}
+                >{`${settings.domain}/${url.shorturl}`}</Link>
               </TableCell>
               <TableCell className='truncate w-[70%] sm:max-w-[300px] max-w-[200px]'>
                 {url.fullurl}

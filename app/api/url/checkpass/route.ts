@@ -1,7 +1,7 @@
 import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
 
-export const POST = async (request) => {
+export const POST = async (request: any) => {
   const data = await request.json();
 
   try {

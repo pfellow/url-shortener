@@ -11,8 +11,8 @@ const ShorteningResults = ({ shortLinkData }: any) => {
     <>
       <p className='text-lg'>
         <Link
-          href={`${settings.domainUrl}${shortLinkData.shorturl}`}
-        >{`${settings.domain}${shortLinkData.shorturl}`}</Link>
+          href={`${settings.domainUrl}/${shortLinkData.shorturl}`}
+        >{`${settings.domain}/${shortLinkData.shorturl}`}</Link>
       </p>
       {shortLinkData.fullurl && (
         <p className='truncate'>{shortLinkData.fullurl}</p>
@@ -26,7 +26,7 @@ const ShorteningResults = ({ shortLinkData }: any) => {
         <p>Valid till: {new Date(shortLinkData.till).toLocaleString()}</p>
       )}
       <Image
-        src={`https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${settings.domainUrl}${shortLinkData.shorturl}`}
+        src={`https://chart.googleapis.com/chart?cht=qr&chs=300x300&chl=${settings.domainUrl}/${shortLinkData.shorturl}`}
         width={200}
         height={200}
         alt='QR code'

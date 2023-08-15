@@ -1,7 +1,7 @@
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -13,74 +13,104 @@ import { Checkbox } from '@/components/ui/checkbox';
 
 import settings from '../settings.json';
 
+const defaultRequest = {
+  linkId: '',
+  type: '',
+  since: '',
+  until: '',
+  unique: false,
+  status: ''
+};
+
 const Statistics = () => {
-  const [request, setRequest] = useState({
-    link: '',
-    type: '',
-    since: '',
-    untill: '',
-    unique: false
-  });
-  const [statistics, setStatistics] = useState('');
+  const [inputLink, setInputLink] = useState('');
+  const [request, setRequest] = useState(defaultRequest);
+  const [statistics, setStatistics] = useState([]);
   const [error, setError] = useState('');
 
   const getStatistics = async () => {
     try {
       const response = await fetch(`/api/url/statistics/`, {
         method: 'POST',
-        body: JSON.stringify({ request }),
+        body: JSON.stringify({ ...request }),
         headers: { 'Content-Type': 'application/json' }
       });
 
       const data = await response.json();
+      console.log(data);
       if (!data) {
-        setStatistics('No data to display');
+        // setStatistics('No data to display');
       }
-      setStatistics(data);
+      console.log(typeof data);
+      setStatistics(data.data);
     } catch (error) {
       setError('Something went wrong. Please try again later');
     }
   };
 
-  const submitHandler = (event) => {
+  const submitHandler = (event: any) => {
     event.preventDefault();
-    if (request.link) {
-      const url = request.link.split('/');
-      console.log(url);
+    if (inputLink) {
       try {
+        const urlArray = inputLink.split('/');
+        const linkId = urlArray[urlArray.length - 1];
         if (
-          url[length - 2] === settings.domain &&
-          /^([a-zA-z0-9]{3,12})$/.test(url[length - 1])
+          urlArray[urlArray.length - 2] !== settings.domain ||
+          !/^([a-zA-z0-9]{3,12})$/.test(linkId)
         ) {
-          console.log('GOOD!'); // CONTINUE HERE
+          setError('No correct oGo link provided');
+        } else {
+          setRequest((prev) => {
+            return { ...prev, linkId };
+          });
         }
-        console.log('BAD!');
+        if (!request.type) {
+          setRequest((prev) => {
+            return { ...prev, type: 'general' };
+          });
+        }
+        setRequest((prev) => {
+          return { ...prev, status: 'ready' };
+        });
       } catch (error) {
-        console.log('ERROR');
+        console.log('Something went wrong... Possibly incorrect user input');
       }
     }
-    // getStatistics(); UNCOMMENT
   };
 
+  useEffect(() => {
+    if (request.status !== 'ready') return;
+    setRequest((prev) => {
+      return { ...prev, status: '' };
+    });
+    getStatistics();
+  }, [request.status]);
+
   return (
-    <section id='statistics'>
-      <div className='grid w-full max-w-sm items-center gap-1.5'>
+    <section id='statistics' className='mx-auto max-w-[620px] p-2 w-full'>
+      <div className='flex flex-col items-start w-full gap-2'>
         <p>Enter ogo link to get clicks statistics</p>
-        <form onSubmit={submitHandler}>
+        <form
+          onSubmit={submitHandler}
+          className='flex flex-col items-start gap-2'
+        >
           <Label htmlFor='pass'>oGo Link</Label>
           <Input
             id='pass'
             type='text'
-            onChange={(event) =>
-              setRequest((prev) => {
-                return { ...prev, link: event.target.value };
-              })
-            }
-            value={request.link}
+            onChange={(event) => setInputLink(event.target.value)}
+            value={inputLink}
             required
           />
-          <Select required name='type'>
-            <SelectTrigger className='w-[180px]'>
+          <Select
+            name='type'
+            onValueChange={(value) =>
+              setRequest((prev) => {
+                return { ...prev, type: value };
+              })
+            }
+          >
+            <SelectTrigger className='w-[240px]'>
               <SelectValue placeholder='Statistics type' />
             </SelectTrigger>
             <SelectContent>
@@ -99,14 +129,64 @@ const Statistics = () => {
             </SelectContent>
           </Select>
           <p>Optional</p>
-          <Input type='datetime-local' name='since' />
-          <Input type='datetime-local' name='until' />
-          <Checkbox name='unique' value={false} id='unique' />
-          <Label htmlFor='unique'>Show only unique clicks</Label>
+          <Label htmlFor='since'>Period from</Label>
+          <Input
+            type='datetime-local'
+            name='since'
+            id='since'
+            onChange={(event) =>
+              setRequest((prev) => {
+                return {
+                  ...prev,
+                  since: Date.parse(
+                    new Date(event.target.value as string).toUTCString()
+                  )
+                };
+              })
+            }
+          />
+          <Label htmlFor='until'>Period until</Label>
+          <Input
+            type='datetime-local'
+            name='until'
+            id='until'
+            onChange={(event) =>
+              setRequest((prev) => {
+                return {
+                  ...prev,
+                  until: Date.parse(
+                    new Date(event.target.value as string).toUTCString()
+                  )
+                };
+              })
+            }
+          />
+
+          <Label htmlFor='unique'>
+            <Checkbox
+              name='unique'
+              value='false'
+              id='unique'
+              onChange={(event) =>
+                setRequest((prev) => {
+                  return { ...prev, unique: event.target.value };
+                })
+              }
+            />{' '}
+            Only unique clicks
+          </Label>
           <Button type='submit'>Get Statistics</Button>
-          {error}
+          {error && <p>{error}</p>}
         </form>
-        {statistics}
+        {statistics &&
+          statistics.map((el) => {
+            console.log(statistics);
+            return (
+              <p className='my-1'>
+                {el._id}: {el.count}
+              </p>
+            );
+          })}
       </div>
     </section>
   );

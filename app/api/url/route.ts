@@ -23,6 +23,12 @@ export const POST = async (request: any) => {
       status: 200
     });
   } catch (error) {
-    return new Response('Failed to shorten this URl!', { status: 500 });
+    return new Response(
+      JSON.stringify({
+        status: 'error',
+        message: "Could not fetch user's urls"
+      }),
+      { status: 500 }
+    );
   }
 };
