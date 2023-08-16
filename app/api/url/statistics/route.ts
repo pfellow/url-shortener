@@ -1,9 +1,9 @@
 import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
+import { PipelineStage } from 'mongoose';
 
 export const POST = async (request: any) => {
   const data = await request.json();
-  //   console.log(data);
 
   try {
     if (!data.type || !/^([a-zA-z0-9]{3,12})$/.test(data.linkId)) {
@@ -14,78 +14,167 @@ export const POST = async (request: any) => {
         }
       });
     }
-    let searchParam;
+    let query = [];
+    let dates = { $match: {} };
+
+    if (data.since) {
+      if (data.till) {
+        if (data.till <= data.since) {
+          throw new Error('"Period until" should be later than "Period from"', {
+            cause: {
+              status: 422,
+              message: '"Period until" should be later than "Period from"'
+            }
+          });
+        } else {
+          dates = {
+            $match: {
+              'clicks.date': {
+                $gte: new Date(data.since),
+                $lte: new Date(data.till)
+              }
+            }
+          };
+        }
+      } else {
+        dates = {
+          $match: {
+            'clicks.date': {
+              $gte: new Date(data.since)
+            }
+          }
+        };
+      }
+    } else if (data.till) {
+      dates = {
+        $match: {
+          'clicks.date': {
+            $lte: new Date(data.till)
+          }
+        }
+      };
+    }
+
     switch (data.type) {
-      case 'general':
-      case 'bymonth':
-      //https://www.mongodb.com/docs/v7.0/reference/operator/aggregation/month/
-      case 'byday':
-      case 'byhour':
-      case 'countries':
-        searchParam = '$clicks.userdata.country';
+      case 'month':
+      case 'dayOfMonth':
+      case 'dayOfWeek':
+      case 'hour':
+        query = [
+          { $match: { shorturl: data.linkId } },
+          { $unwind: '$clicks' },
+          dates,
+          {
+            $project: {
+              [data.type]: {
+                [`$${data.type}`]: {
+                  date: '$clicks.date',
+                  timezone: data.timezone
+                }
+              }
+            }
+          },
+          {
+            $group: {
+              _id: `$${data.type}`,
+              count: { $count: {} }
+            }
+          },
+          {
+            $sort: { _id: 1 }
+          }
+        ];
         break;
-      case 'regions':
-        searchParam = '$clicks.userdata.region';
+      case 'country':
+      case 'region':
+      case 'district':
+      case 'city':
+      case 'browser':
+      case 'platform':
+      case 'device':
+        query = [
+          { $match: { shorturl: data.linkId } },
+          { $unwind: '$clicks' },
+          dates,
+          {
+            $group: {
+              _id: `$clicks.userdata.${data.type}`,
+              count: { $count: {} }
+            }
+          },
+          {
+            $sort: { count: -1 }
+          }
+        ];
         break;
-      case 'districts':
-        searchParam = '$clicks.userdata.district';
-        break;
-      case 'cities':
-        searchParam = '$clicks.userdata.city';
-        break;
-      case 'browsers':
-        searchParam = '$clicks.userdata.browser';
-        break;
-      case 'platforms':
-        searchParam = '$clicks.userdata.platform';
-        break;
-      case 'devices':
-        searchParam = '$clicks.userdata.device';
-        break;
-      case 'referrers':
-        searchParam = '$clicks.referrer';
+      case 'referrer':
+        query = [
+          { $match: { shorturl: data.linkId } },
+          { $unwind: '$clicks' },
+          dates,
+          {
+            $group: {
+              _id: '$clicks.referrer',
+              count: { $count: {} }
+            }
+          },
+          {
+            $sort: { count: -1 }
+          }
+        ];
         break;
       default:
+        query = [
+          { $match: { shorturl: data.linkId } },
+          { $unwind: '$clicks' },
+          dates,
+          {
+            $group: {
+              _id: null,
+              count: { $count: {} }
+            }
+          }
+        ];
     }
-    console.log(searchParam);
 
     connectToDB();
 
-    const urlData = await ShortUrl.aggregate([
-      { $match: { shorturl: data.linkId } },
-      { $unwind: '$clicks' },
-      {
-        $match: {
-          'clicks.date': {
-            $gte: new Date(data.since),
-            $lte: new Date(data.until || '2050')
-          }
+    let urlData;
+
+    const foundUrl = await ShortUrl.findOne({ shorturl: data.linkId }).select(
+      'shorturl fullurl maxclicks since till linkpass date -_id'
+    );
+    if (!foundUrl) {
+      throw new Error('Provided link not found', {
+        cause: {
+          status: 422,
+          message: 'Provided link not found'
         }
-      },
-      {
-        $group: {
-          _id: `${searchParam}`,
-          count: { $count: {} }
-        }
-      },
-      {
-        $sort: { count: -1 }
-      }
-    ]);
+      });
+    }
+    urlData = { ...foundUrl?._doc };
+    if (urlData.linkpass) {
+      delete urlData.linkpass;
+      urlData.fullurl = 'This link is password protected';
+    }
+
+    const clickData = await ShortUrl.aggregate(query as PipelineStage[]);
+
     return new Response(
       JSON.stringify({
-        status: 'OK',
-        data: urlData
+        status: 'ok',
+        urlData,
+        clickData: { type: data.type, stats: clickData }
       }),
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     return new Response(
       JSON.stringify({
         status: 'error',
         message:
-          error.message ||
-          error?.cause?.message || // delete error.message
+          error?.cause?.message ||
           'Something went wrong while fetching statistics'
       }),
       { status: error?.cause?.status || 500 }

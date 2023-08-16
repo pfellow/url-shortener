@@ -25,6 +25,7 @@
     "clsx": "^2.0.0",
     "jsonwebtoken": "^9.0.1",
     "lucide-react": "^0.263.1",
+    "moment": "^2.29.4",
     "mongoose": "^7.4.2",
     "nanoid": "^4.0.2",
     "next": "13.4.13",
@@ -40,6 +41,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.2"
+    "@types/jsonwebtoken": "^9.0.2",
+    "@types/ua-parser-js": "^0.7.36"
   }
 }

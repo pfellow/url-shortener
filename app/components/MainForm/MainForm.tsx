@@ -79,8 +79,8 @@ const MainForm = () => {
     });
     const data = await response.json();
 
-    if (data.error) {
-      form.setError('url', { type: 'custom', message: data.error });
+    if (data?.status === 'error') {
+      form.setError('url', { type: 'custom', message: data.message });
       if (data.shortUrlObj) {
         setShortLinkData(data.shortUrlObj);
       }

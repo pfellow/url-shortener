@@ -14,7 +14,8 @@ export const PUT = async (request: any) => {
     if (alreadyBlocked) {
       return new Response(
         JSON.stringify({
-          status: 'alreadyExists',
+          status: 'error',
+          message: 'This domain is already in the list',
           blockedDomain: domainToBlock.hostname
         }),
         { status: 200 }
@@ -35,7 +36,7 @@ export const PUT = async (request: any) => {
   }
   return new Response(
     JSON.stringify({
-      status: 'success',
+      status: 'ok',
       blockedDomain: domainToBlock.hostname
     }),
     { status: 201 }

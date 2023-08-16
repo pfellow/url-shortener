@@ -6,7 +6,7 @@ import MainForm from './components/MainForm/MainForm';
 import Nav from './components/Nav';
 import ShortenedURLList from './components/ShortenedURLList';
 import UserDataContext from './context/UserDataContext';
-import Statistics from './components/Statistics';
+import Statistics from './components/Statistics/Statistics';
 
 export default function Home() {
   const [prevUrls, setPrevUrls] = useState([]);

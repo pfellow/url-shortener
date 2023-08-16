@@ -1,7 +1,8 @@
+import moment from 'moment';
+import { useEffect, useState } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Label } from '@components/ui/label';
-import { useEffect, useState } from 'react';
 import {
   Select,
   SelectContent,
@@ -9,23 +10,24 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 
-import settings from '../settings.json';
+import settings from '../../settings.json';
+import ShorteningResults from '../MainForm/ShorteningResults';
+import ClickStatistics from './ClickStatistics';
 
 const defaultRequest = {
   linkId: '',
-  type: '',
-  since: '',
-  until: '',
-  unique: false,
+  type: undefined as undefined | string,
+  since: undefined as undefined | number,
+  till: undefined as undefined | number,
+  timezone: '',
   status: ''
 };
 
 const Statistics = () => {
   const [inputLink, setInputLink] = useState('');
   const [request, setRequest] = useState(defaultRequest);
-  const [statistics, setStatistics] = useState([]);
+  const [statistics, setStatistics] = useState({} as any);
   const [error, setError] = useState('');
 
   const getStatistics = async () => {
@@ -38,11 +40,7 @@ const Statistics = () => {
 
       const data = await response.json();
       console.log(data);
-      if (!data) {
-        // setStatistics('No data to display');
-      }
-      console.log(typeof data);
-      setStatistics(data.data);
+      setStatistics(data);
     } catch (error) {
       setError('Something went wrong. Please try again later');
     }
@@ -70,7 +68,11 @@ const Statistics = () => {
           });
         }
         setRequest((prev) => {
-          return { ...prev, status: 'ready' };
+          return {
+            ...prev,
+            timezone: moment().format('Z'),
+            status: 'ready'
+          };
         });
       } catch (error) {
         console.log('Something went wrong... Possibly incorrect user input');
@@ -109,23 +111,25 @@ const Statistics = () => {
                 return { ...prev, type: value };
               })
             }
+            value={request.type}
           >
             <SelectTrigger className='w-[240px]'>
               <SelectValue placeholder='Statistics type' />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='general'>General</SelectItem>
-              <SelectItem value='bymonth'>By month</SelectItem>
-              <SelectItem value='byday'>By day</SelectItem>
-              <SelectItem value='byhour'>By hour</SelectItem>
-              <SelectItem value='countries'>Countries</SelectItem>
-              <SelectItem value='regions'>Regions</SelectItem>
-              <SelectItem value='districts'>Districts</SelectItem>
-              <SelectItem value='cities'>Cities</SelectItem>
-              <SelectItem value='browsers'>Browsers</SelectItem>
-              <SelectItem value='platforms'>Platforms</SelectItem>
-              <SelectItem value='devices'>Devices</SelectItem>
-              <SelectItem value='referrers'>Referrers</SelectItem>
+              <SelectItem value='month'>By month</SelectItem>
+              <SelectItem value='dayOfMonth'>By day of month</SelectItem>
+              <SelectItem value='dayOfWeek'>By day of week</SelectItem>
+              <SelectItem value='hour'>By hour</SelectItem>
+              <SelectItem value='country'>Countries</SelectItem>
+              <SelectItem value='region'>Regions</SelectItem>
+              <SelectItem value='district'>Districts</SelectItem>
+              <SelectItem value='city'>Cities</SelectItem>
+              <SelectItem value='browser'>Browsers</SelectItem>
+              <SelectItem value='platform'>Platforms</SelectItem>
+              <SelectItem value='device'>Devices</SelectItem>
+              <SelectItem value='referrer'>Referrers</SelectItem>
             </SelectContent>
           </Select>
           <p>Optional</p>
@@ -148,45 +152,26 @@ const Statistics = () => {
           <Label htmlFor='until'>Period until</Label>
           <Input
             type='datetime-local'
-            name='until'
-            id='until'
+            name='till'
+            id='till'
             onChange={(event) =>
               setRequest((prev) => {
                 return {
                   ...prev,
-                  until: Date.parse(
+                  till: Date.parse(
                     new Date(event.target.value as string).toUTCString()
                   )
                 };
               })
             }
           />
-
-          <Label htmlFor='unique'>
-            <Checkbox
-              name='unique'
-              value='false'
-              id='unique'
-              onChange={(event) =>
-                setRequest((prev) => {
-                  return { ...prev, unique: event.target.value };
-                })
-              }
-            />{' '}
-            Only unique clicks
-          </Label>
           <Button type='submit'>Get Statistics</Button>
           {error && <p>{error}</p>}
         </form>
-        {statistics &&
-          statistics.map((el) => {
-            console.log(statistics);
-            return (
-              <p className='my-1'>
-                {el._id}: {el.count}
-              </p>
-            );
-          })}
+        {statistics?.urlData && statistics?.clickData?.type === 'general' && (
+          <ShorteningResults shortLinkData={statistics.urlData} />
+        )}
+        <ClickStatistics stats={statistics} />
       </div>
     </section>
   );

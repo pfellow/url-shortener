@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@components/ui/input';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 
-const saveUserClick = async (urlId) => {
+const saveUserClick = async (urlId: any) => {
   // Retrieving and saving user data
 
   let userData;
@@ -35,11 +35,11 @@ const saveUserClick = async (urlId) => {
   } catch (erorr) {}
 };
 
-const URLRedirect = ({ params }) => {
-  const [displayData, setDisplayData] = useState('Loading...');
+const URLRedirect = ({ params }: any) => {
+  const [displayData, setDisplayData] = useState('Loading...' as any);
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const getRedirectUrl = async () => {
       // retrieving the url data ans status
 
@@ -68,7 +68,7 @@ const URLRedirect = ({ params }) => {
           const [enteredPass, setEnteredPass] = useState('');
           const [incorrectPassword, setIncorrectPassword] = useState('');
 
-          const passwordCheckHandler = async (event) => {
+          const passwordCheckHandler = async (event: any) => {
             event.preventDefault();
             if (enteredPass) {
               try {
@@ -81,13 +81,11 @@ const URLRedirect = ({ params }) => {
                 });
 
                 const passData = await response.json();
-                if (passData.status === 'OK' && passData.url.fullurl) {
+                if (passData.status === 'ok' && passData.url.fullurl) {
                   saveUserClick(data.url.id);
-                  return setDisplayData(`Success redirection!`); // DELETE
+                  return setDisplayData(`Successful redirection!`); // DELETE
 
-                  // return setTimeout(() => {
-                  //   router.push(passData.url.fullurl);
-                  // }, 3000);
+                  // router.push(passData.url.fullurl);
                 }
                 if (passData.status === 'error') {
                   throw new Error(passData?.message);
@@ -123,14 +121,12 @@ const URLRedirect = ({ params }) => {
         return;
       }
 
-      if (data.status === 'OK' && data.url) {
+      if (data.status === 'ok' && data.url) {
         saveUserClick(data.url.id);
 
-        return setDisplayData(`Success redirection!`); // DELETE
+        return setDisplayData(`Successful redirection!`); // DELETE
 
-        // return setTimeout(() => {
-        //   router.push(data.url.fullurl);
-        // }, 3000);
+        // router.push(data.url.fullurl);
       }
     };
 

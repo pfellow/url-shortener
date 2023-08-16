@@ -16,7 +16,8 @@ export const POST = async (request: any) => {
   if (!data.guestId || !data.token) {
     return new Response(
       JSON.stringify({
-        error: 'Authorization failed. Please reload the page.'
+        status: 'error',
+        message: 'Authorization failed. Please reload the page.'
       }),
       {
         status: 401
@@ -44,7 +45,8 @@ export const POST = async (request: any) => {
   } catch (error: any) {
     return new Response(
       JSON.stringify({
-        error: error.message
+        status: 'error',
+        message: error.message
       }),
       {
         status: 401
@@ -60,7 +62,8 @@ export const POST = async (request: any) => {
     if (domain.hostname === process.env.DOMAIN) {
       return new Response(
         JSON.stringify({
-          error: 'Shortened links can not be shortened again!'
+          status: 'error',
+          message: 'Shortened links can not be shortened again!'
         }),
         {
           status: 403
@@ -78,7 +81,8 @@ export const POST = async (request: any) => {
     console.log(error);
     return new Response(
       JSON.stringify({
-        error: 'Seems like this URL is not correct or not allowed.'
+        status: 'error',
+        message: 'Seems like this URL is not correct or not allowed.'
       }),
       {
         status: 403
@@ -127,7 +131,7 @@ export const POST = async (request: any) => {
 
       if (
         data.since >= serverUTCTime - 5 * 60000 &&
-        data.since <= Date.UTC(2050)
+        data.since <= Date.UTC(2050, 1)
       ) {
         sanitizedData.since = data.since;
       } else {
@@ -139,7 +143,7 @@ export const POST = async (request: any) => {
 
       if (
         data.till >= (data.since || serverUTCTime) &&
-        data.till <= Date.UTC(2050)
+        data.till <= Date.UTC(2050, 1)
       ) {
         sanitizedData.till = data.till;
       } else {
@@ -149,7 +153,8 @@ export const POST = async (request: any) => {
   } catch (error: any) {
     return new Response(
       JSON.stringify({
-        error: 'Incorrect data provided: ' + error.message
+        status: 'error',
+        message: 'Incorrect data provided: ' + error.message
       }),
       {
         status: 422
@@ -181,12 +186,13 @@ export const POST = async (request: any) => {
       ) {
         return new Response(
           JSON.stringify({
+            status: 'error',
+            message:
+              'This url has been shortened previosly. You can use this link or create another one with a custom name.',
             shortUrlObj: {
               fullurl: foundUrl.fullurl,
               shorturl: foundUrl.shorturl
-            },
-            error:
-              'This url has been shortened previosly. You can use this link or create another one with a custom name.'
+            }
           }),
           {
             status: 200
@@ -213,7 +219,8 @@ export const POST = async (request: any) => {
     if (error.message !== 'This operation was aborted') {
       return new Response(
         JSON.stringify({
-          error: 'Seems like this URL is not correct or not allowed.'
+          status: 'error',
+          message: 'Seems like this URL is not correct or not allowed.'
         }),
         {
           status: 403
@@ -256,7 +263,8 @@ export const POST = async (request: any) => {
   if (safeBrData.matches) {
     return new Response(
       JSON.stringify({
-        error: 'Could not shorten this link as it seems unsafe.'
+        status: 'error',
+        message: 'Could not shorten this link as it seems unsafe.'
       }),
       {
         status: 403
@@ -308,7 +316,8 @@ export const POST = async (request: any) => {
     } catch (error) {
       return new Response(
         JSON.stringify({
-          error: 'Could not generate a short URL. Please try again later'
+          status: 'error',
+          message: 'Could not generate a short URL. Please try again later'
         }),
         { status: 500 }
       );
@@ -334,12 +343,18 @@ export const POST = async (request: any) => {
     delete sanitizedData.guestId;
     delete sanitizedData.creatorIp;
 
-    return new Response(JSON.stringify({ shortUrlObj: sanitizedData }), {
-      status: 200
-    });
+    return new Response(
+      JSON.stringify({ status: 'ok', shortUrlObj: sanitizedData }),
+      {
+        status: 200
+      }
+    );
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: 'Failed to shorten this URl! ' }),
+      JSON.stringify({
+        status: 'error',
+        message: 'Failed to shorten this URl! '
+      }),
       {
         status: 500
       }

@@ -4,15 +4,15 @@ import UAParser from 'ua-parser-js';
 import { connectToDB } from '@utils/database';
 import ShortUrl from '@models/shortUrl';
 
-export const POST = async (request) => {
+export const POST = async (request: any) => {
   const data = await request.json();
-  const userData = {};
+  const clickData = {} as any;
 
   // useragent: Browser, OS, Device
 
-  const parser = new UAParser(headers().get('user-agent'));
+  const parser = new UAParser(headers().get('user-agent') as any);
   const uaparsed = parser.getResult();
-  const userdata = {};
+  const userdata = {} as any;
 
   if (uaparsed?.browser?.name) {
     userdata.browser = `${uaparsed.browser.name} ${uaparsed.browser.major}`;
@@ -30,7 +30,7 @@ export const POST = async (request) => {
   // referrer
 
   if (data.referrer) {
-    userData.referrer = data.referrer;
+    clickData.referrer = data.referrer;
   }
 
   // City, Country, Region, District, ip
@@ -45,7 +45,7 @@ export const POST = async (request) => {
     }
   }
 
-  userData.userdata = userdata;
+  clickData.userdata = userdata;
 
   // retriving link from DB and writing a userclick
 
@@ -56,9 +56,9 @@ export const POST = async (request) => {
     if (!foundUrl) {
       throw new Error('Incorrect url id');
     }
-    foundUrl.clicks.push(userData);
+    foundUrl.clicks.push(clickData);
     foundUrl.save();
-  } catch (error) {
+  } catch (error: any) {
     console.log('Could not write a userlick in DB ', error.message);
   }
 

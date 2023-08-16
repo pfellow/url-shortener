@@ -15,7 +15,8 @@ export const POST = async (request: any) => {
     console.log(error);
     return new Response(
       JSON.stringify({
-        error: 'Incorrect guestId!'
+        status: 'error',
+        message: 'Incorrect guestId!'
       }),
       {
         status: 422
@@ -27,11 +28,12 @@ export const POST = async (request: any) => {
     {
       guestId
     },
-    process.env.JWT_SECRET_KEY_SIMPLE,
+    process.env.JWT_SECRET_KEY_SIMPLE as string,
     { expiresIn: '3h' }
   );
   return new Response(
     JSON.stringify({
+      status: 'ok',
       guestId,
       token
     }),

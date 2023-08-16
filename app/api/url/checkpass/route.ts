@@ -40,7 +40,7 @@ export const POST = async (request: any) => {
         }
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     return new Response(
       JSON.stringify({
         status: 'error',

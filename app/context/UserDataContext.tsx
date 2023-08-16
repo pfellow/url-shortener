@@ -4,7 +4,7 @@ import { createContext } from 'react';
 
 const UserDataContext = createContext({
   prevUrls: [],
-  setPrevUrls: (urls) => {},
+  setPrevUrls: (urls: any) => {},
   userData: { guestId: '', token: '' }
 });
 

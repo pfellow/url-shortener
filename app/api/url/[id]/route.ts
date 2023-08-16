@@ -61,8 +61,8 @@ export const GET = async (request: any, { params }: any) => {
       id: foundUrl._id
     };
 
-    return new Response(JSON.stringify({ status: 'OK', url }), { status: 200 });
-  } catch (error) {
+    return new Response(JSON.stringify({ status: 'ok', url }), { status: 200 });
+  } catch (error: any) {
     console.log(error);
     return new Response(
       JSON.stringify({
