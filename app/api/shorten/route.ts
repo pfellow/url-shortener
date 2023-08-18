@@ -55,9 +55,9 @@ export const POST = async (request: any) => {
   }
 
   // Checking that the link is URL and it is not already shortened link
-
+  let domain;
   try {
-    const domain = new URL(data.fullurl);
+    domain = new URL(data.fullurl);
 
     if (domain.hostname === process.env.DOMAIN) {
       return new Response(
@@ -75,7 +75,7 @@ export const POST = async (request: any) => {
       domain: domain.hostname
     });
     if (blockedDomain) {
-      throw new Error('This domain is in the blacklist: ' + domain.hostname);
+      throw new Error('Could not shorten this link as it seems unsafe.');
     }
   } catch (error) {
     console.log(error);
@@ -260,7 +260,14 @@ export const POST = async (request: any) => {
     })
   });
   const safeBrData = await safeBrResponse.json();
+  console.log('CHECKING SAFE BROWSING');
   if (safeBrData.matches) {
+    fetch(process.env.ENV_URL + '/api/blockedDomain/', {
+      method: 'PUT',
+      body: JSON.stringify({ url: data.fullurl, reason: 'Safebrowsing check' }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+
     return new Response(
       JSON.stringify({
         status: 'error',
@@ -271,7 +278,6 @@ export const POST = async (request: any) => {
       }
     );
   }
-
   // Checking that the link is not maliscious
 
   // try {
@@ -291,6 +297,11 @@ export const POST = async (request: any) => {
   //     checkURLData.suspicious ||
   //     checkURLData.risk_score >= 85
   //   ) {
+  // fetch(process.env.ENV_URL + '/api/blockedDomain/', {
+  //   method: 'PUT',
+  //   body: JSON.stringify({ url: data.fullurl, reason: "IPquality check" }),
+  //   headers: { 'Content-Type': 'application/json' }
+  // });
   //     return new Response(
   //       JSON.stringify({
   //         error: 'Could not shorten this link as it seems unsafe.'

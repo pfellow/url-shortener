@@ -7,6 +7,9 @@ import Nav from './components/Nav';
 import ShortenedURLList from './components/ShortenedURLList';
 import UserDataContext from './context/UserDataContext';
 import Statistics from './components/Statistics/Statistics';
+import Terms from './components/Terms';
+import Contact from './components/Contact';
+import Panel from './components/Panel';
 
 export default function Home() {
   const [prevUrls, setPrevUrls] = useState([]);
@@ -55,6 +58,9 @@ export default function Home() {
           <MainForm />
           <ShortenedURLList />
           <Statistics />
+          <Terms />
+          <Contact />
+          <Panel />
         </UserDataContext.Provider>
       </main>
       <Footer />

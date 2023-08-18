@@ -3,6 +3,8 @@ import BlockedDomain from '@models/blockedDomain';
 
 export const PUT = async (request: any) => {
   const data = await request.json();
+  console.log('HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  console.log(data);
   let domainToBlock: URL;
 
   try {

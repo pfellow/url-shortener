@@ -43,7 +43,7 @@ const ShortenedURLList = () => {
   }, []);
 
   return (
-    <div className='mx-auto max-w-[620px] p-2 w-full'>
+    <section className='mx-auto max-w-[620px] p-2 w-full'>
       {isLoading && <p>Loading your previous shortened URLs</p>}
       {prevUrls.length > 0 && (
         <Table className='sm:text-sm text-xs'>
@@ -80,7 +80,7 @@ const ShortenedURLList = () => {
           </TableBody>
         </Table>
       )}
-    </div>
+    </section>
   );
 };
 

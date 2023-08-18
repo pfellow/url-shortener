@@ -55,7 +55,7 @@ const MainForm = () => {
       url: '',
       custom: '',
       linkpass: '',
-      maxclicks: undefined,
+      maxclicks: '' as any,
       since: '',
       till: ''
     }
