@@ -6,7 +6,7 @@ export const POST = async (request: any) => {
   const data = await request.json();
 
   try {
-    if (!data.type || !/^([a-zA-z0-9]{3,12})$/.test(data.linkId)) {
+    if (!data.type || !/^([a-zA-z0-9-]{3,12})$/.test(data.linkId)) {
       throw new Error('Incorrect input data provided.', {
         cause: {
           status: 422,

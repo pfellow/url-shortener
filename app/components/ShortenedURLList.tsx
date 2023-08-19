@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow
-} from '@/components/ui/table';
+} from '@app/components/ui/table';
 import Link from 'next/link';
 
 import UserDataContext from '@app/context/UserDataContext';

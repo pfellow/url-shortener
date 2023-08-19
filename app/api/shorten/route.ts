@@ -95,7 +95,7 @@ export const POST = async (request: any) => {
 
   try {
     if (data.custom) {
-      if (/^([a-zA-z0-9]{3,12})$/.test(data.custom)) {
+      if (/^([a-zA-z0-9-]{3,12})$/.test(data.custom)) {
         connectToDB();
         const foundUrl = await ShortUrl.findOne({
           shorturl: data.custom

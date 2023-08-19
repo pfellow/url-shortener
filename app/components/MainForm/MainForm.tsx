@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@app/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,14 +12,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form';
+} from '@app/components/ui/form';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger
-} from '@/components/ui/accordion';
-import { Input } from '@/components/ui/input';
+} from '@app/components/ui/accordion';
+import { Input } from '@app/components/ui/input';
 import { useContext, useState } from 'react';
 
 import UserDataContext from '@app/context/UserDataContext';

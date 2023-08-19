@@ -1,9 +1,10 @@
 'use client';
 
+import { useContext, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import { Button } from './ui/button';
 import {
   Form,
   FormControl,
@@ -12,27 +13,38 @@ import {
   FormItem,
   FormLabel,
   FormMessage
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from './ui/form';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue
-} from '@/components/ui/select';
+} from './ui/select';
+
+import UserDataContext from '../context/UserDataContext';
 
 const formSchema = z.object({
   email: z.string().email(),
-  name: z.string().optional(),
+  name: z.union([z.string().min(2).max(30), z.string().length(0).optional()]),
   ogolink: z.string().optional(),
-  message: z.string().min(5),
+  message: z
+    .string()
+    .min(5, {
+      message: 'Your message should contain more than 5 characters.'
+    })
+    .max(3000, {
+      message: 'Your message should contain more than 3000 characters.'
+    }),
   type: z.string()
 });
 
 export function Contact() {
-  // 1. Define your form.
+  const { userData } = useContext(UserDataContext);
+  const [isSending, setIsSending] = useState(false);
+  const [formStatus, setFormStatus] = useState('');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,12 +56,36 @@ export function Contact() {
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-    alert('The message has been sent!');
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setIsSending(true);
+      setFormStatus('Please wait...');
+      const response = await fetch('/api/feedback', {
+        method: 'PUT',
+        body: JSON.stringify({
+          data: values,
+          guestId: userData.guestId,
+          token: userData.token
+        })
+      });
+      const data = await response.json();
+      if ((data.status = 'error')) {
+        setFormStatus(data.message);
+      }
+      if (data.ticket) {
+        setFormStatus(`The message ${data.ticket} has been sent.`);
+      }
+    } catch (error) {
+      setFormStatus('Unexpected error. Please try again later.');
+    }
+    setIsSending(false);
+    form.reset({
+      email: '',
+      name: '',
+      ogolink: '',
+      message: '',
+      type: undefined
+    });
   }
   return (
     <section id='contact' className='mx-auto max-w-[620px] p-2 w-full'>
@@ -74,7 +110,7 @@ export function Contact() {
                     className='max-w-[300px]'
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage></FormMessage>
               </FormItem>
             )}
           />
@@ -104,7 +140,7 @@ export function Contact() {
                 <FormLabel>oGo link</FormLabel>
                 <FormControl>
                   <Input
-                    type='url'
+                    type='text'
                     placeholder='ogo.gl/abcdef'
                     {...field}
                     className='max-w-[300px]'
@@ -165,7 +201,10 @@ export function Contact() {
             )}
           />
 
-          <Button type='submit'>Send</Button>
+          <Button type='submit' disabled={isSending}>
+            {!isSending ? 'Send' : 'Sending'}
+          </Button>
+          <div>{formStatus}</div>
         </form>
       </Form>
     </section>

@@ -1,9 +1,8 @@
-import './globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'oGo URL shortener',
-  description: 'oGo free URL shortener ogo.gl'
+  title: 'ogo URL shortener',
+  description: 'URL shortener ogo.gl'
 };
 
 export default function RootLayout({
@@ -11,5 +10,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <html lang='en'>{children}</html>;
+  return (
+    <html lang='en'>
+      <body>{children}</body>
+    </html>
+  );
 }

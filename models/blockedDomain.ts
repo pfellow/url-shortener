@@ -14,8 +14,8 @@ const blockedDomainSchema = new mongoose.Schema({
   }
 });
 
-const ShortUrl =
+const BlockedDomain =
   mongoose.models.BlockedDomain ||
   mongoose.model('BlockedDomain', blockedDomainSchema);
 
-export default ShortUrl;
+export default BlockedDomain;

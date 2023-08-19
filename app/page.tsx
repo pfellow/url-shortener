@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Inter } from 'next/font/google';
+const inter = Inter({ subsets: ['latin'] });
 import Footer from './components/Footer';
 import MainForm from './components/MainForm/MainForm';
 import Nav from './components/Nav';
@@ -9,11 +11,11 @@ import UserDataContext from './context/UserDataContext';
 import Statistics from './components/Statistics/Statistics';
 import Terms from './components/Terms';
 import Contact from './components/Contact';
-import Panel from './components/Panel';
 
 export default function Home() {
   const [prevUrls, setPrevUrls] = useState([]);
   const [userData, setUserData] = useState({ guestId: '', token: '' });
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     const userDataLocal = localStorage.getItem('ogogl') || '{}';
@@ -51,19 +53,20 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <Nav />
-      <main className='flex flex-col justify-center items-center w-full'>
-        <UserDataContext.Provider value={{ prevUrls, setPrevUrls, userData }}>
+    <UserDataContext.Provider
+      value={{ prevUrls, setPrevUrls, userData, theme, setTheme }}
+    >
+      <body className={`${inter.className} ${theme}`}>
+        <Nav />
+        <main className='flex flex-col justify-center items-center w-full'>
           <MainForm />
           <ShortenedURLList />
           <Statistics />
           <Terms />
           <Contact />
-          <Panel />
-        </UserDataContext.Provider>
-      </main>
-      <Footer />
-    </>
+        </main>
+        <Footer />
+      </body>
+    </UserDataContext.Provider>
   );
 }

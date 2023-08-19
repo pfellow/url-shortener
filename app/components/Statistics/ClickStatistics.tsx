@@ -1,7 +1,6 @@
 import moment from 'moment';
 
 const ClickStatistics = ({ stats }: any) => {
-  console.log(stats);
   if (stats.status === 'error')
     return (
       <p>{stats.message || 'Something went wrong. Please try again later'}</p>

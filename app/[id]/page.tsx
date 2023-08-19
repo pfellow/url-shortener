@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Input } from '@components/ui/input';
-import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
+import { Input } from '@app/components/ui/input';
+import { Button } from '@app/components/ui/button';
+import { Label } from '@app/components/ui/label';
 
 const saveUserClick = async (urlId: any) => {
   // Retrieving and saving user data
