@@ -49,7 +49,7 @@ const ShortenedURLList = () => {
       {isLoading && <Loader />}
       {prevUrls.length > 0 && (
         <Table className='sm:text-sm text-xs'>
-          <TableCaption className='caption-top text-lg text-accent'>
+          <TableCaption className='caption-top text-lg text-primary'>
             Your 10 previous shortened URLs
           </TableCaption>
           <TableHeader>

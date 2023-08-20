@@ -1,11 +1,23 @@
+import { Separator } from '@components/ui/separator';
 import moment from 'moment';
 
 const ClickStatistics = ({ stats }: any) => {
   if (stats.status === 'error')
     return (
-      <p>{stats.message || 'Something went wrong. Please try again later'}</p>
+      <>
+        <p>{stats.message || 'Something went wrong. Please try again later'}</p>
+        <Separator />
+      </>
     );
-  if (!stats.clickData) return <p>Statistics will be displayed here</p>;
+  if (!stats.clickData)
+    return (
+      <>
+        <p className='text-lg text-accent py-2'>
+          Statistics will be displayed here
+        </p>
+        <Separator />
+      </>
+    );
   const data = stats.clickData;
   let dataToDisplay = {
     clicks: 0,
@@ -47,7 +59,11 @@ const ClickStatistics = ({ stats }: any) => {
             </p>
           );
         })}
-      <p className='font-bold'>Total clicks: {dataToDisplay.clicks}</p>
+      <p className='text-lg'>
+        Total clicks:{' '}
+        <span className='text-accent font-bold'>{dataToDisplay.clicks}</span>
+      </p>
+      <Separator />
     </>
   );
 };

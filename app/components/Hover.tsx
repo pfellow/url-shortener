@@ -13,8 +13,8 @@ const HoverCardInstance = (props: any) => {
           {props.title}
         </Button>
       </HoverCardTrigger>
-      <HoverCardContent className='w-80'>
-        <div className='flex justify-between space-x-4'>{props.content}</div>
+      <HoverCardContent>
+        <div>{props.content}</div>
       </HoverCardContent>
     </HoverCard>
   );

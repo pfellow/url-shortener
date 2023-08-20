@@ -14,6 +14,8 @@ import {
 import settings from '../../settings.json';
 import ShorteningResults from '../MainForm/ShorteningResults';
 import ClickStatistics from './ClickStatistics';
+import HoverCardInstance from '../Hover';
+import { Separator } from '@components/ui/separator';
 
 const defaultRequest = {
   linkId: '',
@@ -25,7 +27,7 @@ const defaultRequest = {
 };
 
 const Statistics = () => {
-  const [inputLink, setInputLink] = useState();
+  const [inputLink, setInputLink] = useState('');
   const [request, setRequest] = useState(defaultRequest);
   const [statistics, setStatistics] = useState({} as any);
   const [error, setError] = useState('');
@@ -91,18 +93,22 @@ const Statistics = () => {
   return (
     <section id='clicks' className='mx-auto max-w-[700px] p-2 w-full mt-4'>
       <div className='flex flex-col items-start w-full gap-2'>
-        <p className='text-lg text-accent'>
-          Enter ogo link to get clicks statistics
-        </p>
+        <h2 className='text-lg text-primary font-bold'>Clicks Statistics</h2>
+        <p className='text-lg text-primary'></p>
         <form
           onSubmit={submitHandler}
           className='flex flex-col items-start gap-2'
         >
-          <Label htmlFor='pass'>oGo Link</Label>
+          <Label htmlFor='pass'>
+            <HoverCardInstance
+              title='oGo Link'
+              content='Enter oGo link to get clicks statistics'
+            />
+          </Label>
           <Input
             id='pass'
             type='text'
-            onChange={(event) => setInputLink(event.target.value)}
+            onChange={(event: any) => setInputLink(event.target.value)}
             value={inputLink}
             placeholder={`${settings.domain}/abcdef`}
             required
@@ -135,9 +141,14 @@ const Statistics = () => {
               <SelectItem value='referrer'>Referrers</SelectItem>
             </SelectContent>
           </Select>
-          <p>Optional</p>
-          <Label htmlFor='since'>Period from</Label>{' '}
-          //https://github.com/arqex/react-datetime
+          <p className='text-primary'>Optional</p>
+          {/* https://github.com/arqex/react-datetime */}
+          <Label htmlFor='since'>
+            <HoverCardInstance
+              title='Period from'
+              content='Start of the clicks statistics period'
+            />
+          </Label>
           <Input
             type='datetime-local'
             name='since'
@@ -153,7 +164,12 @@ const Statistics = () => {
               })
             }
           />
-          <Label htmlFor='until'>Period until</Label>
+          <Label htmlFor='until'>
+            <HoverCardInstance
+              title='Period until'
+              content='End of the clicks statistics period'
+            />
+          </Label>
           <Input
             type='datetime-local'
             name='till'
@@ -172,6 +188,7 @@ const Statistics = () => {
           <Button type='submit'>Get Statistics</Button>
           {error && <p>{error}</p>}
         </form>
+        <Separator />
         {statistics?.urlData && statistics?.clickData?.type === 'general' && (
           <ShorteningResults shortLinkData={statistics.urlData} />
         )}

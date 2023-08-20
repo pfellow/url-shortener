@@ -25,6 +25,7 @@ import {
 } from './ui/select';
 
 import UserDataContext from '../context/UserDataContext';
+import HoverCardInstance from './Hover';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -44,7 +45,10 @@ const formSchema = z.object({
 export function Contact() {
   const { userData } = useContext(UserDataContext);
   const [isSending, setIsSending] = useState(false);
-  const [formStatus, setFormStatus] = useState('');
+  const [formStatus, setFormStatus] = useState({
+    color: '',
+    message: ''
+  });
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,7 +63,6 @@ export function Contact() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSending(true);
-      setFormStatus('Please wait...');
       const response = await fetch('/api/feedback', {
         method: 'PUT',
         body: JSON.stringify({
@@ -70,13 +73,22 @@ export function Contact() {
       });
       const data = await response.json();
       if ((data.status = 'error')) {
-        setFormStatus(data.message);
+        setFormStatus({
+          color: 'destructive',
+          message: data.message
+        });
       }
       if (data.ticket) {
-        setFormStatus(`The message ${data.ticket} has been sent.`);
+        setFormStatus({
+          color: 'accent',
+          message: `Message ${data.ticket} has been sent`
+        });
       }
     } catch (error) {
-      setFormStatus('Unexpected error. Please try again later.');
+      setFormStatus({
+        color: 'destructive',
+        message: 'Unexpected error. Please try again later'
+      });
     }
     setIsSending(false);
     form.reset({
@@ -88,9 +100,9 @@ export function Contact() {
     });
   }
   return (
-    <section id='contact' className='mx-auto max-w-[620px] p-2 w-full'>
-      <h2>Contact us</h2>
-      <p>
+    <section id='contact' className='mx-auto max-w-[700px] p-2 w-full'>
+      <h2 className='text-lg text-primary font-bold'>Contact us</h2>
+      <p className='leading-6 my-4'>
         If you want to report us a bug, make a suggestion or complain about
         inappropriate or malicious link, please fill this form.
       </p>
@@ -101,7 +113,12 @@ export function Contact() {
             name='name'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>
+                  <HoverCardInstance
+                    title='Name'
+                    content='Enter your name, 2-30 characters (optional)'
+                  />
+                </FormLabel>
                 <FormControl>
                   <Input
                     type='text'
@@ -119,7 +136,12 @@ export function Contact() {
             name='email'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>
+                  <HoverCardInstance
+                    title='Email'
+                    content='Enter your name (required)'
+                  />
+                </FormLabel>
                 <FormControl>
                   <Input
                     type='email'
@@ -137,7 +159,12 @@ export function Contact() {
             name='ogolink'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>oGo link</FormLabel>
+                <FormLabel>
+                  <HoverCardInstance
+                    title='oGo Link'
+                    content='Enter oGo Link you want to give feedback on (optional)'
+                  />
+                </FormLabel>
                 <FormControl>
                   <Input
                     type='text'
@@ -155,7 +182,12 @@ export function Contact() {
             name='type'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Your request type</FormLabel>
+                <FormLabel>
+                  <HoverCardInstance
+                    title='Request type'
+                    content='Choose a type of your request from the list (required)'
+                  />
+                </FormLabel>
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
@@ -187,7 +219,12 @@ export function Contact() {
             name='message'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Your message</FormLabel>
+                <FormLabel>
+                  <HoverCardInstance
+                    title='Message'
+                    content='Type your message, 5-3000 characters (required)'
+                  />
+                </FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder='Type your message here'
@@ -200,11 +237,12 @@ export function Contact() {
               </FormItem>
             )}
           />
-
-          <Button type='submit' disabled={isSending}>
-            {!isSending ? 'Send' : 'Sending'}
-          </Button>
-          <div>{formStatus}</div>
+          <div className='flex items-center gap-4'>
+            <Button type='submit' disabled={isSending}>
+              {!isSending ? 'Send' : 'Sending...'}
+            </Button>
+            <p className={formStatus.color}>{formStatus.message}</p>
+          </div>
         </form>
       </Form>
     </section>
