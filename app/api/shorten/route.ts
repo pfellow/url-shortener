@@ -165,25 +165,18 @@ export const POST = async (request: any) => {
   // Checking if the url is already in DB
 
   try {
-    const foundUrl = await ShortUrl.findOne({ fullurl: data.fullurl });
+    const foundUrl = await ShortUrl.findOne({
+      fullurl: data.fullurl,
+      linkpass: { $exists: false },
+      maxclicks: { $exists: false },
+      since: { $exists: false },
+      till: { $exists: false }
+    });
 
     if (foundUrl !== null) {
       // Cheching that in the saved version and in the new data there are custom fields
 
-      if (
-        !(
-          data.custom ||
-          data.linkpass ||
-          data.maxclicks ||
-          data.since ||
-          data.till ||
-          foundUrl.custom ||
-          foundUrl.linkpass ||
-          foundUrl.maxclicks ||
-          foundUrl.since ||
-          foundUrl.till
-        )
-      ) {
+      if (!(data.linkpass || data.maxclicks || data.since || data.till)) {
         return new Response(
           JSON.stringify({
             status: 'error',

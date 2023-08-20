@@ -24,6 +24,8 @@ import { useContext, useState } from 'react';
 
 import UserDataContext from '@app/context/UserDataContext';
 import ShorteningResults from './ShorteningResults';
+import HoverCardInstance from '../Hover';
+import Loader from '../Loader';
 
 const formSchema = z.object({
   url: z.string().url(),
@@ -39,7 +41,10 @@ const formSchema = z.object({
     z.string().min(3).max(18),
     z.string().length(0).optional()
   ]),
-  maxclicks: z.coerce.number().nonnegative().optional(),
+  maxclicks: z.union([
+    z.coerce.number().positive(),
+    z.string().length(0).optional()
+  ]),
   since: z.string().optional(),
   till: z.string().optional()
 });
@@ -102,33 +107,41 @@ const MainForm = () => {
   };
 
   return (
-    <div className='mx-auto max-w-[600px] p-6 w-full flex flex-col gap-8 items-center'>
+    <section className='sm:mt-10 mx-auto max-w-[700px] p-2 w-full flex flex-col gap-8 items-center'>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='w-full'>
-          <div className='flex sm:flex-row flex-col sm:justify-between sm:items-start gap-2 w-full'>
+          <div
+            className='flex sm:flex-row flex-col
+          sm:items-start gap-2 w-full'
+          >
             <FormField
               control={form.control}
               name='url'
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Enter URL</FormLabel>
+                <FormItem className='w-full'>
+                  <FormLabel>
+                    <HoverCardInstance
+                      title='Enter URL'
+                      content='Just enter a long URL and click "Shorten"'
+                    />
+                  </FormLabel>
                   <FormControl>
                     <Input
                       placeholder='https://google.com'
                       {...field}
-                      className='min-w-[450px]'
+                      className='w-full'
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type='submit' className='sm:mt-6'>
+            <Button type='submit' className='sm:mt-7'>
               Shorten
             </Button>
           </div>
           <div className='my-4 flex flex-col gap-1'>
-            {isLoading && <p>The URL is shortening...</p>}
+            {isLoading && <Loader />}
             <ShorteningResults shortLinkData={shortLinkData} />
           </div>
           <Accordion type='single' collapsible>
@@ -140,7 +153,12 @@ const MainForm = () => {
                   name='custom'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Custom Link</FormLabel>
+                      <FormLabel>
+                        <HoverCardInstance
+                          title='Custom Link'
+                          content='3-12 characters, case-sensitive (letters, numbers and -)'
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder='cool'
@@ -157,7 +175,12 @@ const MainForm = () => {
                   name='linkpass'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Link Password</FormLabel>
+                      <FormLabel>
+                        <HoverCardInstance
+                          title='Link Password'
+                          content='3-18 characters, case-sensitive'
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder='password'
@@ -174,7 +197,12 @@ const MainForm = () => {
                   name='maxclicks'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Clicks</FormLabel>
+                      <FormLabel>
+                        <HoverCardInstance
+                          title='Max Clicks'
+                          content='Maximum number of clicks, > 0'
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input
                           type='number'
@@ -192,7 +220,12 @@ const MainForm = () => {
                   name='since'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valid Since</FormLabel>
+                      <FormLabel>
+                        <HoverCardInstance
+                          title='Valid Since'
+                          content='Date/time when the link becomes active (your local time)'
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input type='datetime-local' {...field} />
                       </FormControl>
@@ -205,7 +238,12 @@ const MainForm = () => {
                   name='till'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valid Till</FormLabel>
+                      <FormLabel>
+                        <HoverCardInstance
+                          title='Valid Till'
+                          content='Date/time when the link becomes no longer active (your local time)'
+                        />
+                      </FormLabel>
                       <FormControl>
                         <Input type='datetime-local' {...field} />
                       </FormControl>
@@ -218,7 +256,7 @@ const MainForm = () => {
           </Accordion>
         </form>
       </Form>
-    </div>
+    </section>
   );
 };
 

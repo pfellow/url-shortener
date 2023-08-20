@@ -1,15 +1,6 @@
 import logo from '@public/logo.svg';
 import Link from 'next/link';
-import ThemeSwitch from './ThemeSwitch';
-import MobileNav from './MobileNav';
 import Image from 'next/image';
-
-const headerNavLinks = [
-  { href: '/', title: 'Shorten' },
-  { href: '#clicks', title: 'Click Statistics' },
-  { href: '#terms', title: 'Terms Of Service' },
-  { href: '#contact', title: 'Contact Us' }
-];
 
 const Nav = () => {
   return (

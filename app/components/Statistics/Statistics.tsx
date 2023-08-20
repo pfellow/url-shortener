@@ -25,7 +25,7 @@ const defaultRequest = {
 };
 
 const Statistics = () => {
-  const [inputLink, setInputLink] = useState('');
+  const [inputLink, setInputLink] = useState();
   const [request, setRequest] = useState(defaultRequest);
   const [statistics, setStatistics] = useState({} as any);
   const [error, setError] = useState('');
@@ -89,9 +89,11 @@ const Statistics = () => {
   }, [request.status]);
 
   return (
-    <section id='statistics' className='mx-auto max-w-[620px] p-2 w-full'>
+    <section id='clicks' className='mx-auto max-w-[700px] p-2 w-full mt-4'>
       <div className='flex flex-col items-start w-full gap-2'>
-        <p>Enter ogo link to get clicks statistics</p>
+        <p className='text-lg text-accent'>
+          Enter ogo link to get clicks statistics
+        </p>
         <form
           onSubmit={submitHandler}
           className='flex flex-col items-start gap-2'
@@ -102,6 +104,7 @@ const Statistics = () => {
             type='text'
             onChange={(event) => setInputLink(event.target.value)}
             value={inputLink}
+            placeholder={`${settings.domain}/abcdef`}
             required
           />
           <Select
@@ -133,7 +136,8 @@ const Statistics = () => {
             </SelectContent>
           </Select>
           <p>Optional</p>
-          <Label htmlFor='since'>Period from</Label>
+          <Label htmlFor='since'>Period from</Label>{' '}
+          //https://github.com/arqex/react-datetime
           <Input
             type='datetime-local'
             name='since'

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Inter } from 'next/font/google';
-const inter = Inter({ subsets: ['latin'] });
+import { Oxygen } from 'next/font/google';
+const heebo = Oxygen({ weight: '400', subsets: ['latin'] });
 import Footer from './components/Footer';
 import MainForm from './components/MainForm/MainForm';
 import Nav from './components/Nav';
@@ -56,9 +56,9 @@ export default function Home() {
     <UserDataContext.Provider
       value={{ prevUrls, setPrevUrls, userData, theme, setTheme }}
     >
-      <body className={`${inter.className} ${theme}`}>
+      <body className={`${heebo.className} ${theme}`}>
         <Nav />
-        <main className='flex flex-col justify-center items-center w-full'>
+        <main className='flex flex-col justify-center items-center max-w-[1000px] mx-auto lg:rounded-lg'>
           <MainForm />
           <ShortenedURLList />
           <Statistics />

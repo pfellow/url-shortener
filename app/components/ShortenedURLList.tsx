@@ -14,6 +14,8 @@ import Link from 'next/link';
 
 import UserDataContext from '@app/context/UserDataContext';
 import settings from '../settings.json';
+import Loader from './Loader';
+import { Separator } from '@/components/ui/separator';
 
 const ShortenedURLList = () => {
   const { prevUrls, setPrevUrls } = useContext(UserDataContext);
@@ -43,12 +45,12 @@ const ShortenedURLList = () => {
   }, []);
 
   return (
-    <section className='mx-auto max-w-[620px] p-2 w-full'>
-      {isLoading && <p>Loading your previous shortened URLs</p>}
+    <section className='mx-auto max-w-[700px] p-2 w-full' id='previous'>
+      {isLoading && <Loader />}
       {prevUrls.length > 0 && (
         <Table className='sm:text-sm text-xs'>
-          <TableCaption className='caption-top'>
-            List of your 10 previous shortened URLs.
+          <TableCaption className='caption-top text-lg text-accent'>
+            Your 10 previous shortened URLs
           </TableCaption>
           <TableHeader>
             <TableRow>
@@ -80,6 +82,7 @@ const ShortenedURLList = () => {
           </TableBody>
         </Table>
       )}
+      <Separator />
     </section>
   );
 };
