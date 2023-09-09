@@ -24,7 +24,7 @@ const saveUserClick = async (urlId: any) => {
   }
 
   try {
-    fetch('/api/userclick', {
+    await fetch('/api/userclick', {
       method: 'POST',
       body: JSON.stringify({
         userData,
@@ -82,10 +82,10 @@ const URLRedirect = ({ params }: any) => {
 
                 const passData = await response.json();
                 if (passData.status === 'ok' && passData.url.fullurl) {
-                  saveUserClick(data.url.id);
-                  return setDisplayData(`Successful redirection!`); // DELETE
+                  await saveUserClick(data.url.id);
+                  // return setDisplayData(`Successful redirection!`); // FOR TESTING PURPOSES
 
-                  // router.push(passData.url.fullurl);
+                  return router.push(passData.url.fullurl);
                 }
                 if (passData.status === 'error') {
                   throw new Error(passData?.message);
@@ -122,11 +122,11 @@ const URLRedirect = ({ params }: any) => {
       }
 
       if (data.status === 'ok' && data.url) {
-        saveUserClick(data.url.id);
+        await saveUserClick(data.url.id);
 
         // return setDisplayData(`Successful redirection!`); // FOR TESTING PURPOSES
 
-        router.push(data.url.fullurl);
+        return router.push(data.url.fullurl);
       }
     };
 
