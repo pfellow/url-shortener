@@ -29,7 +29,7 @@ const ShorteningResults = ({ shortLinkData }: any) => {
       </div>
 
       {shortLinkData.fullurl && (
-        <p className='truncate'>{shortLinkData.fullurl}</p>
+        <p className='truncate w-full'>{shortLinkData.fullurl}</p>
       )}
       {shortLinkData.maxclicks && (
         <p>

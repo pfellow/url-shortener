@@ -124,9 +124,9 @@ const URLRedirect = ({ params }: any) => {
       if (data.status === 'ok' && data.url) {
         saveUserClick(data.url.id);
 
-        return setDisplayData(`Successful redirection!`); // DELETE
+        // return setDisplayData(`Successful redirection!`); // FOR TESTING PURPOSES
 
-        // router.push(data.url.fullurl);
+        router.push(data.url.fullurl);
       }
     };
 
