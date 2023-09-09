@@ -35,17 +35,19 @@ export const POST = async (request: any) => {
 
   // City, Country, Region, District, ip
 
-  for (const [key, value] of Object.entries(data.userData)) {
-    if (key === 'query') {
-      userdata.ip = value;
-    } else if (key === 'regionName') {
-      userdata.region = value;
-    } else if (value !== '' && key !== 'status') {
-      userdata[key] = value;
+  if (data.userData) {
+    for (const [key, value] of Object.entries(data.userData)) {
+      if (key === 'query') {
+        userdata.ip = value;
+      } else if (key === 'regionName') {
+        userdata.region = value;
+      } else if (value !== '' && key !== 'status') {
+        userdata[key] = value;
+      }
     }
-  }
 
-  clickData.userdata = userdata;
+    clickData.userdata = userdata;
+  }
 
   // retriving link from DB and writing a userclick
 
