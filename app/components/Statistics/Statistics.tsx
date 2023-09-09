@@ -15,7 +15,7 @@ import settings from '../../settings.json';
 import ShorteningResults from '../MainForm/ShorteningResults';
 import ClickStatistics from './ClickStatistics';
 import HoverCardInstance from '../Hover';
-import { Separator } from '@components/ui/separator';
+import { Separator } from '@app/components/ui/separator';
 
 const defaultRequest = {
   linkId: '',

@@ -1,4 +1,4 @@
-import { Separator } from '@components/ui/separator';
+import { Separator } from '@app/components/ui/separator';
 import moment from 'moment';
 
 const ClickStatistics = ({ stats }: any) => {

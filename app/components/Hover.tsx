@@ -3,7 +3,7 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger
-} from '@/components/ui/hover-card';
+} from '@app/components/ui/hover-card';
 
 const HoverCardInstance = (props: any) => {
   return (

@@ -3,9 +3,9 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from '@/components/ui/popover';
+} from '@app/components/ui/popover';
 
-const Copy = ({ onClick }) => {
+const Copy = ({ onClick }: any) => {
   return (
     <div onClick={onClick}>
       <Popover>
