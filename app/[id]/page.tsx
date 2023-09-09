@@ -83,9 +83,9 @@ const URLRedirect = ({ params }: any) => {
                 const passData = await response.json();
                 if (passData.status === 'ok' && passData.url.fullurl) {
                   await saveUserClick(data.url.id);
-                  // return setDisplayData(`Successful redirection!`); // FOR TESTING PURPOSES
+                  return setDisplayData(`Successful redirection!`); // FOR TESTING PURPOSES
 
-                  return router.push(passData.url.fullurl);
+                  //return router.push(passData.url.fullurl);
                 }
                 if (passData.status === 'error') {
                   throw new Error(passData?.message);
