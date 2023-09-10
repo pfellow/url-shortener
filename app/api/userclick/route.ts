@@ -64,5 +64,5 @@ export const POST = async (request: any) => {
     console.log('Could not write a userlick in DB ', error.message);
   }
 
-  return new Response('OK');
+  return new Response('ok');
 };

@@ -32,7 +32,7 @@ export const POST = async (request: any) => {
     } else {
       return new Response(
         JSON.stringify({
-          status: 'OK',
+          status: ok',
           url: { id: foundUrl._id, fullurl: foundUrl.fullurl }
         }),
         {
